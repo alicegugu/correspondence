@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="BLAS">
+      <UniqueIdentifier>{df883063-c258-43e0-8823-5a5acf69cbeb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{19561294-75d4-4fe3-9ad5-449a12b8ad44}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{1913779a-6618-4def-912d-6fcb4d1b38e5}</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{592af0fd-1935-4f3b-9446-17e7b317086d}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\LSolver\BLAS\daxpy.c">
+      <Filter>BLAS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LSolver\BLAS\dcopy.c">
+      <Filter>BLAS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LSolver\BLAS\ddot.c">
+      <Filter>BLAS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LSolver\BLAS\dnrm2.c">
+      <Filter>BLAS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LSolver\BLAS\dscal.c">
+      <Filter>BLAS</Filter>
+    </ClCompile>
+    <ClCompile Include="SparseMatrix.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="avltree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SparseMatrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

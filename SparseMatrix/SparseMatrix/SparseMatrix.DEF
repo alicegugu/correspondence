@@ -1,0 +1,5 @@
+LIBRARY SparseMatrix
+DESCRIPTION "SparseMatrix"
+EXPORTS
+	SuperLUSolve
+	MosekSolve

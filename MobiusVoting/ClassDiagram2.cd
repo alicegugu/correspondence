@@ -1,0 +1,221 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Another::T_PolyhedralSurf_rings&lt;TPoly, VertexPropertyMap&gt;" Collapsed="true">
+    <Position X="10" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>polyhedralsurf_rings.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Another3DPainting::My_One2OneMap&lt;Key, Value, Sort&gt;" Collapsed="true">
+    <Position X="10" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>another3dpainting\my_one2onemap.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Another3DPainting::Another_HDS_model" Collapsed="true">
+    <Position X="11.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>YRGICINgADQAAASAgIIACEACRQAACASgABgBBIiIAAA=</HashCode>
+      <FileName>Another3DPainting\Another_HDS_model.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Another3DPainting::Sort&lt;Value&gt;" Collapsed="true">
+    <Position X="2.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>another3dpainting\sort.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Another::GeometryProcessingAlgorithm" Collapsed="true">
+    <Position X="8.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>geometryprocessingalgorithm.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="Another::Hedge_cmp" Collapsed="true">
+    <Position X="11.75" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>geometryprocessingalgorithm.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Another::Face_cmp" Collapsed="true">
+    <Position X="8.25" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>geometryprocessingalgorithm.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Another3DPainting::My_items" Collapsed="true">
+    <Position X="8.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Another3DPainting\Another_HDS_model.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Another3DPainting::Traits" Collapsed="true">
+    <Position X="11.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>another3dpainting\traits.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Typedef Name="Another::Vertex2int_map_type" Collapsed="true">
+    <Position X="10" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>geometryprocessingalgorithm.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Another::Hedge2double_map_type" Collapsed="true">
+    <Position X="13.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>geometryprocessingalgorithm.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Another3DPainting::PAINTMODEL_HDS" Collapsed="true">
+    <Position X="10" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Another3DPainting\Another_HDS_model.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Another3DPainting::Decorator" Collapsed="true">
+    <Position X="6.5" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Another3DPainting\Another_HDS_model.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Another3DPainting::Vertex" Collapsed="true">
+    <Position X="11.75" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Another3DPainting\Another_HDS_model.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Another3DPainting::Face" Collapsed="true">
+    <Position X="11.75" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Another3DPainting\Another_HDS_model.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Another3DPainting::Face_handle" Collapsed="true">
+    <Position X="13.5" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Another3DPainting\Another_HDS_model.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Another3DPainting::Vertex_handle" Collapsed="true">
+    <Position X="13.5" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Another3DPainting\Another_HDS_model.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Another3DPainting::Edge" Collapsed="true">
+    <Position X="8.25" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Another3DPainting\Another_HDS_model.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Another3DPainting::Edge_handle" Collapsed="true">
+    <Position X="10" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Another3DPainting\Another_HDS_model.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Another3DPainting::Vertex_iterator" Collapsed="true">
+    <Position X="6.5" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Another3DPainting\Another_HDS_model.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Another3DPainting::Halfedge_iterator" Collapsed="true">
+    <Position X="8.25" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Another3DPainting\Another_HDS_model.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Another3DPainting::Face_iterator" Collapsed="true">
+    <Position X="6.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Another3DPainting\Another_HDS_model.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Another3DPainting::HalfedgeDS" Collapsed="true">
+    <Position X="10" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Another3DPainting\Another_HDS_model.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Another3DPainting::Kernel" Collapsed="true">
+    <Position X="6.5" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>another3dpainting\traits.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Another3DPainting::Point" Collapsed="true">
+    <Position X="6.5" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>another3dpainting\traits.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Another3DPainting::Vector" Collapsed="true">
+    <Position X="10" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>another3dpainting\traits.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Another3DPainting::Normal" Collapsed="true">
+    <Position X="8.25" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>another3dpainting\traits.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Another3DPainting::Plane" Collapsed="true">
+    <Position X="11.75" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>another3dpainting\traits.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Another3DPainting::PlanePoint" Collapsed="true">
+    <Position X="13.5" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>another3dpainting\traits.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Another3DPainting::Segment" Collapsed="true">
+    <Position X="8.25" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>another3dpainting\traits.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Enum Name="RenderOption" Collapsed="true">
+    <Position X="6.5" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ogl3.cpp</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

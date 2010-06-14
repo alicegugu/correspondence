@@ -1,0 +1,35 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: SparseMatrix - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\yhe\LOCALS~1\Temp\RSP35.tmp" with contents
+[
+/nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "SPARSEMATRIX_EXPORTS" /D "MSKDLL" /Fp"..\Debug\SparseMatrix/SPARSEMATRIX.pch" /YX /Fo"..\Debug\SparseMatrix/" /Fd"..\Debug\SparseMatrix/" /FD /GZ /c 
+"C:\yhe\3DFantasy\SparseMatrix\SparseMatrix.cpp"
+]
+Creating command line "cl.exe @C:\DOCUME~1\yhe\LOCALS~1\Temp\RSP35.tmp" 
+Creating temporary file "C:\DOCUME~1\yhe\LOCALS~1\Temp\RSP36.tmp" with contents
+[
+superlu.lib /nologo /dll /incremental:yes /pdb:"..\bin\Debug/SPARSEMATRIX.pdb" /debug /machine:I386 /def:".\SparseMatrix.DEF" /out:"..\bin\Debug/SPARSEMATRIX.dll" /implib:"..\bin\Debug/SPARSEMATRIX.lib" /pdbtype:sept /libpath:"..\bin\Debug" 
+\yhe\3DFantasy\Debug\SparseMatrix\SparseMatrix.obj
+..\mosek\3\tools\platform\win\dll\mosek3_1.lib
+]
+Creating command line "link.exe @C:\DOCUME~1\yhe\LOCALS~1\Temp\RSP36.tmp"
+<h3>Output Window</h3>
+Compiling...
+SparseMatrix.cpp
+c:\yhe\3dfantasy\sparsematrix\sparsematrix.h(96) : warning C4251: 'm_elements' : class 'AVLTree<class SparseMatrixElement>' needs to have dll-interface to be used by clients of class 'SparseMatrix'
+Linking...
+   Creating library ..\bin\Debug/SPARSEMATRIX.lib and object ..\bin\Debug/SPARSEMATRIX.exp
+
+
+
+<h3>Results</h3>
+SPARSEMATRIX.dll - 0 error(s), 1 warning(s)
+</pre>
+</body>
+</html>
