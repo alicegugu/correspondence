@@ -353,12 +353,134 @@ namespace Another
 			break;
 		case RenderOption::TRIANGULAR:
 			draw(WIREFRAME,1,1);
+		case RenderOption::LAPLACE:
+			draw_laplacian();
+			break;
 		case RenderOption::DEFAULT:
 			draw(SMOOTH,1,1);
 		}
 		return true;
 	}
 
+	void Another_HDS_model::draw_laplacian()
+	{
+		glShadeModel(GL_SMOOTH);
+		enable_material();
+		glBegin(GL_TRIANGLES);
+		GLfloat vertexArray[3];
+		GLfloat normalArray[3];
+		float tmp_u;
+		float tmp_v;
+		Vertex_handle v;
+		Point p;
+		Normal n;
+		Face_iterator faceIt = facets_begin();
+		Halfedge_handle tmpedge,firstedge;
+
+		for( ; faceIt!= facets_end(); faceIt++ )
+		{
+			tmpedge = faceIt->halfedge();
+			int faceID = faceIt->GetFaceID();
+
+			v = tmpedge->vertex();
+
+			glColor4fv( m_color );
+			p = v->m_laplace_position;
+			n = v->GetNormal();
+			vertexArray[0] = p.x();
+			vertexArray[1] = p.y();
+			vertexArray[2] = p.z();
+// 			normalArray[0] = n.x();
+// 			normalArray[1] = n.y();
+// 			normalArray[2] = n.z();
+
+
+
+
+			glNormal3fv(normalArray);
+
+			if (m_has_gaussian_curvature)
+			{
+				double curvature = v->Get1DU();
+				glTexCoord2f(curvature, curvature);
+			}
+			if (m_has_UV)
+			{
+				tmp_u = v->GetU();
+				tmp_v = v->GetV();
+				glTexCoord2f(tmp_v,tmp_u);
+			}
+			glVertex3fv(vertexArray);
+
+			tmpedge=tmpedge->next();
+			v = tmpedge->vertex();
+			// 						if(v->GetType() == CORNER || v->GetType() == EDGE)
+			// 						{
+			// 							glColor4fv(m_corner_color);
+			// 						}
+			// 						else
+			// 						{
+			// 							glColor4fv( m_color );
+			// 						}
+			glColor4fv( m_color );
+			p = v->m_laplace_position;
+			n = v->GetNormal();
+			vertexArray[0] = p.x();
+			vertexArray[1] = p.y();
+			vertexArray[2] = p.z();
+			normalArray[0] = n.x();
+			normalArray[1] = n.y();
+			normalArray[2] = n.z();
+			glNormal3fv(normalArray);
+			if (m_has_gaussian_curvature)
+			{
+				double curvature = v->Get1DU();
+				glTexCoord2f(curvature,curvature);
+			}
+			if (m_has_UV)
+			{
+				tmp_u = v->GetU();
+				tmp_v = v->GetV();
+				glTexCoord2f(tmp_v,tmp_u);
+			}
+			glVertex3fv(vertexArray);
+
+			tmpedge=tmpedge->next();
+			v = tmpedge->vertex();
+			// 						if(v->GetType() == CORNER || v->GetType() == EDGE)
+			// 						{
+			// 							glColor4fv(m_corner_color);
+			// 						}
+			// 						else
+			// 						{
+			// 							glColor4fv( m_color );
+			// 						}
+			glColor4fv( m_color );
+			p = v->m_laplace_position;
+			n = v->GetNormal();
+			vertexArray[0] = p.x();
+			vertexArray[1] = p.y();
+			vertexArray[2] = p.z();
+			normalArray[0] = n.x();
+			normalArray[1] = n.y();
+			normalArray[2] = n.z();
+			glNormal3fv(normalArray);
+			if (m_has_gaussian_curvature)
+			{
+				double curvature = v->Get1DU();
+				glTexCoord2f(curvature, curvature);
+			}
+			if (m_has_UV)
+			{
+				tmp_u = v->GetU();
+				tmp_v = v->GetV();
+				glTexCoord2f(tmp_v,tmp_u);
+			}
+			glVertex3fv(vertexArray);
+		}
+		glEnd();
+
+	}
 	void Another_HDS_model::get_guassian_curvature(vector<double>& gc)
 	{
 		for (Another::Vertex_iterator it = vertices_begin(); it != vertices_end(); ++it)
@@ -1289,6 +1411,91 @@ namespace Another
 	{
 		Vertex_handle v = m_features[name];
 		return v->GetIndex();
+	}
+
+
+	bool Another_HDS_model::load_laplacian_mesh(ifstream& file)
+	{
+		vector<Point> coordinates;
+		float v1,v2,v3;
+		while(file.good())
+		{
+			file>>v1>>v2>>v3;
+			Point tmpp(v1,v2,v3);
+			coordinates.push_back(tmpp);
+		}
+
+		Vertex_handle tmpv = vertices_begin();
+		for ( ; tmpv!= vertices_end(); ++tmpv )
+		{
+			int index = tmpv->GetIndex()-1;
+			tmpv->m_laplace_position = coordinates[index];
+		}
+
+		return true;
+	}
+
+
+	/************************************************************************/
+	/* /brife                                                                     */
+	/************************************************************************/
+	bool Another_HDS_model::save_m_file(string filename, int type)
+	{
+		//Open a file and check the statu of file
+		ofstream stream;
+		stream.open(filename.c_str());
+		if (stream.fail()||!stream.good())
+		{
+			cerr<<"Error Another_HDS_model::save_m_file: Can not open file: "<<filename<<endl;
+			return false;
+		}
+
+		//Write vertices into file. the index is 1-based
+		Vertex_iterator vib = vertices_begin();
+		Vertex_iterator vie = vertices_end();
+		Vertex_iterator vitmp = vib;
+		for (; vitmp!=vie; vitmp++ )
+		{
+			//Vertex 1  -0.998566 -0.998968 0.882 
+			int vertexIndexTmp = vitmp->GetIndex();
+			Point_3 coordinatesTmp;
+			if (type == 1)
+			{
+				coordinatesTmp = vitmp->m_laplace_position;
+			}
+			else
+				 coordinatesTmp = vitmp->point();
+
+			stream<<"Vertex "<<vertexIndexTmp<<" "<<coordinatesTmp[0]<<" "<<coordinatesTmp[1]<<" "<<coordinatesTmp[2]<<endl;
+		}
+
+		//Write faces into file, the index is 1-based
+		Face_iterator fib = facets_begin();
+		Face_iterator fie = facets_end();
+		Face_iterator fitemp = fib;
+		int faceIndexTmp = 1;
+		for (; fitemp!=fie; fitemp++)
+		{
+			//Format: Face 1 100 101 102
+
+			int vertexIndex[3];
+			Halfedge_iterator tmpedge = fitemp->halfedge();
+			Vertex_iterator v = tmpedge->vertex();
+			vertexIndex[0] = v->GetIndex();
+			tmpedge=tmpedge->next();
+			v = tmpedge->vertex();
+			vertexIndex[1] = v->GetIndex();
+			tmpedge=tmpedge->next();
+			v = tmpedge->vertex();
+			vertexIndex[2] = v->GetIndex();
+
+			stream<<"Face "<<faceIndexTmp<<" "<<vertexIndex[0]<<" "<<vertexIndex[1]<<" "<<vertexIndex[2]<<endl;
+
+			faceIndexTmp++;
+		}
+
+		stream.close();
+		return true;
 	}
 
 	/************************************************************************/

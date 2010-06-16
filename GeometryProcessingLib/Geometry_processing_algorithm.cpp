@@ -18,12 +18,177 @@ namespace Another
 	{
 	}
 
+	double GeometryProcessingAlgorithm::fix_sine(double sine)
+	{
+		if(sine >= 1)
+			return 1;
+		else if(sine <= -1)
+			return -1;
+		else
+			return sine;
+	}
+	double GeometryProcessingAlgorithm::compute_angle_rad(Another::Point P, Another::Point Q, Another::Point R)
+	{
+		double PI_s = 3.14159265359;
+
+		Another::Vector_3 u = P - Q;
+		Another::Vector_3 v = R - Q;
+
+		// check
+		double product = std::sqrt(u*u) * std::sqrt(v*v);
+		if(product == 0)
+			return 0.0;
+
+		// cosine
+		double dot = (u*v);
+		double cosine = dot / product;
+
+		// sine
+		Another::Vector_3 w = CGAL::cross_product(u,v);
+		double AbsSine = std::sqrt(w*w) / product;
+
+		if(cosine >= 0)
+			return std::asin(fix_sine(AbsSine));
+		else
+			return PI_s-std::asin(fix_sine(AbsSine));
+	}
+
+	double GeometryProcessingAlgorithm::computeCot(Another::Point position_v_i, Another::Point position_v_j, Another::Point position_v_k, Another::Point position_v_l )
+	{
+		// Compute the norm of v_j -> v_i vector
+		Another::Vector_3 edge = position_v_i - position_v_j;
+		double len = std::sqrt(edge*edge);
+
+		// Compute angle of (v_j,v_i,v_k) corner (i.e. angle of v_i corner)
+		// if v_k is the vertex before v_j when circulating around v_i
+
+		double gamma_ij  = compute_angle_rad(position_v_i, position_v_k, position_v_j);
+
+
+		// Compute angle of (v_l,v_i,v_j) corner (i.e. angle of v_i corner)
+		// if v_l is the vertex after v_j when circulating around v_i
+
+		double delta_ij = compute_angle_rad(position_v_i, position_v_l, position_v_j);
+
+
+		double weight = 0.0;
+		assert(len != 0.0);    // two points are identical!
+		double cot_gamma = 0.0;
+		double cot_delta = 0.0;
+		double PI_s = 3.14159265359;
+		if (gamma_ij<0.01)
+		{
+			cot_gamma = 10;
+		}
+		else if (gamma_ij>PI_s -0.01)
+		{
+			cot_gamma = -10;
+		}
+		else
+		{
+			cot_gamma = (double)1.0/std::tan(gamma_ij);
+		}
+		if (delta_ij<0.01)
+		{
+			cot_delta = 10;
+		}
+		else if(delta_ij> (PI_s-0.01))
+		{
+			cot_delta = -10;
+		}
+		else
+		{
+			cot_delta = (double)1.0/std::tan(delta_ij);
+		}
+
+		if(len != 0.0)
+			weight = cot_gamma +cot_delta;
+		else
+			weight = 0;
+
+
+		return weight;
+	}
+
+
+
+	/************************************************************************/
+	/* \brief Calculate the Laplacian matrix of the model                   */
+	/* \param																*/
+	/************************************************************************/
+	double* GeometryProcessingAlgorithm::LaplacianMatrix(Another_HDS_model&model, LapalacianOperatorType type)
+	{
+		double* lpMatrix = NULL;
+		int n = model.size_of_vertices();
+		lpMatrix = (double*)malloc(n*n*sizeof(double));
+		
+		
+		for (int i=0; i<n; ++i)
+		{
+			for (int j=0; j<n; ++j)
+			{
+				lpMatrix[i*n+j] =0;
+			}
+		}
+
+		//For each vertex
+		Another::Vertex_handle tmpv = model.vertices_begin();
+		for (;tmpv!= model.vertices_end(); ++tmpv)
+		{
+			int tmpIndex = tmpv->GetIndex()-1;
+			Another::Point  Vi_position = tmpv->point();
+
+			//1-ring neighbor
+			Another::Halfedge_handle tmpEdge;
+			Another::Halfedge_handle firstEdge = tmpv->halfedge();
+			tmpEdge = firstEdge;
+			bool first = true;
+			double sum = 0.0;
+			while(tmpEdge != firstEdge||first) //1-ring neighbor
+			{
+				first = false;
+
+				Another::Vertex_handle vtmpj; //Vertex_handle vtmp;
+
+				Another::Halfedge_handle lastEdge = tmpEdge;
+				Another::Halfedge_handle lastOppositeEdge = tmpEdge->opposite();
+				vtmpj =  lastOppositeEdge->vertex(); //neighbor
+				Another::Point Vj_position = vtmpj->point();
+
+				Another::Halfedge_handle Eik = tmpEdge->next();
+				Another::Vertex_handle Vk = Eik->vertex();
+				Another::Point  Vk_position = Vk->point();
+
+				Another::Halfedge_handle Ejl = lastOppositeEdge->next();
+				Another::Vertex_handle Vl = Ejl->vertex();
+				Another::Point  Vl_position = Vl->point();
+
+				double wij = 0.0;
+				if ( type == Another::LapalacianOperatorType::COTANGENT )
+				{
+					wij = computeCot(Vi_position, Vj_position, Vk_position, Vl_position);
+				}
+				else if ( type ==  Another::LapalacianOperatorType::UNIFORM )
+				{
+					wij = 1.0;
+				}
+				int nIndex = vtmpj->GetIndex()-1;
+				lpMatrix[tmpIndex*n+nIndex] = -wij;
+				sum = sum + wij;
+				tmpEdge = Ejl->next();
+			
+			}
+			lpMatrix[tmpIndex*n+tmpIndex] = sum;
+		}
+		return lpMatrix;
+	}
+
 	/************************************************************************/
 	/* \brief Gather points around the vertex using one-neighhor-ring.		*/
 	/*  copied from CGAL/examples/Jet_fitting_3/Mesh_estimation.cpp			*/
 	/*	@param[in] v the vertex												*/
 	/*	@param[out] neighbor the neighbors vertexes of v					*/
-	/*	@param[in] The property map containing the 
+	/*	@param[in] The property map containing the							*/
 	/************************************************************************/
 	void GeometryProcessingAlgorithm::GatheringNeighborRings(Vertex* v, Vertex_PM_type& vpm, std::vector<Point_3>& neighhor, int neighborPointsToUse, int min_nb_points, int nb_rings)
 	{

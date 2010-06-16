@@ -163,7 +163,7 @@ double compute_angle_rad(Another::Point P, Another::Point Q, Another::Point R)
 
 
 
-double computeCot(Another::Point position_v_j, Another::Point position_v_i, Another::Point position_v_k, Another::Point position_v_l )
+double computeCot(Another::Point position_v_i, Another::Point position_v_j, Another::Point position_v_k, Another::Point position_v_l )
 {
 	// Compute the norm of v_j -> v_i vector
 	Another::Vector_3 edge = position_v_i - position_v_j;
@@ -487,10 +487,20 @@ public:
 
 #pragma endregion
 
+#pragma region Embedding
+
+		LoadLaplace(sourceModel);
+		LoadLaplace(targetModel);
+
+ 		LaplacianMatrix(sourceModel);
+ 		LaplacianMatrix(targetModel);
+
+#pragma endregion
+
 #pragma region Harmonic map
 
-	//	HarmonicMap(sourceModel);
-	//	HarmonicMap(targetModel);
+		HarmonicMap(sourceModel);
+		HarmonicMap(targetModel);
 
 #pragma endregion
 
@@ -509,8 +519,71 @@ public:
 
 	}
 
+	void LoadLaplace(int model)
+	{
+		cout<<"Loading Laplacian coordinates for model: "<< model <<endl;
+
+		//Get the model
+		Another::Another_HDS_model* tmpModel = g_model[model];
+		ifstream laplaceFile;
+		string name = "LaplaceCoordinates";
+		string pofix = ".txt";
+		string s = boost::lexical_cast<string>( model );
+		name += s;
+		name += pofix;
+		laplaceFile.open(name.c_str());
+		tmpModel->load_laplacian_mesh(laplaceFile);
+		laplaceFile.close();
+
+		string mfileposix = ".m";
+		string savefilename = "model";
+		savefilename +=s;
+		savefilename +=mfileposix;
+		tmpModel->save_m_file(savefilename,1);
+		cout<<"Finish Loading Laplacian matrix " <<endl;
+	}
 
 
+	void LaplacianMatrix(int model)
+	{
+		cout<<"Calculate Laplacian matrix for model: "<< model <<endl;
+
+		//Get the model
+		Another::Another_HDS_model* tmpModel = g_model[model];
+		if (tmpModel)
+		{
+			Another::GeometryProcessingAlgorithm al;
+			double* lpMatrix = al.LaplacianMatrix(*tmpModel,Another::LapalacianOperatorType::COTANGENT);
+			
+			if (lpMatrix == NULL)
+			{
+				return;
+			}
+
+			//Save the matrix to file
+			int n = tmpModel->size_of_vertices();
+			ofstream matrixFile;
+			string name = "LaplacaianMatrix";
+			string pofix = ".txt";
+			string s = boost::lexical_cast<string>( model );
+			name += s;
+			name += pofix;
+			matrixFile.open(name.c_str());
+			if (matrixFile.good())
+			{
+				for (int i = 0; i<n; ++i)
+				{
+					for (int j = 0; j<n; ++j)
+					{
+						matrixFile<<lpMatrix[i*n+j]<<" ";
+					}
+					matrixFile<<"\n";
+				}
+			}
+			matrixFile.close();
+		}
+		cout<<"Finish Calculating Laplacian matrix " <<endl;
+	}
 
 	/************************************************************************/
 	/* /brief Load model from m file                                        */
@@ -606,7 +679,7 @@ public:
 			cin >> m;
 			cin >> n;
 			//Harmonic map
-			int length = tmpModel->get_vertex_number();
+			int length = tmpModel->size_of_vertices();
 			double* matrix = DiscreteHarmonicMap(tmpModel, m, n, length);
 			double* matrixA = GetA(matrix, m, n , length);
 			double* matrixB = GetB(matrix, m , n, length);
@@ -858,6 +931,16 @@ public:
 			glEnable(GL_TEXTURE_2D);
 			g_model[sourceModel]->draw(m_renderOption);
 			glDisable(GL_TEXTURE_2D);
+			break;
+		case Another::RenderOption::LAPLACE:
+			//left view for source
+			glViewport(0, 0, l_wsW/2, l_wsH);
+			g_model[sourceModel]->draw(m_renderOption);
+
+			//right view for target
+			glViewport(l_wsW/2, 0, l_wsW/2, l_wsH);
+			g_model[targetModel]->draw(m_renderOption);
+			break;
 		case Another::RenderOption::DEFAULT:
 			glViewport(0, 0, l_wsW, l_wsH);
 			g_model[sourceModel]->draw(m_renderOption);
@@ -988,6 +1071,9 @@ public:
 		{
 		case 27:	// 0x1b = ESC
 			Close();// Close Window!
+			break;
+		case 'a':
+			m_renderOption = Another::RenderOption::LAPLACE;
 			break;
 		case 'm': //show original models todo
 			m_renderOption = Another::RenderOption::MESH;

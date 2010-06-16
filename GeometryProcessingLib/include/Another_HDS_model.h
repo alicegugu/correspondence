@@ -37,7 +37,8 @@ namespace Another
 		TRIANGULAR = 4,
 		FEATURE_POINT = 5,
 		CORRESPONDENCE = 6,
-		DEFAULT = 7
+		DEFAULT = 7,
+		LAPLACE = 8 
 	};
     //An item wrapper using My_vertex, My_halfedge, My_face
 	struct My_items: public CGAL::Polyhedron_items_3
@@ -195,6 +196,7 @@ namespace Another
 			void draw_feature_points(int mode);
 			void set_enlarge(GLint name);
 			void draw_mid_edge_features(int mode);
+			void draw_laplacian();
            /*************************************************************************************************************************************/
             
            
@@ -232,6 +234,7 @@ namespace Another
             bool load_m_file(FILE * mf);
 			bool load_off_file(const char * filename);
 			bool load_obj_file(FILE* mf);
+			bool load_laplacian_mesh(ifstream& file);
             
            //Save all the setting and model data to a file 
             bool Save();
@@ -246,6 +249,7 @@ namespace Another
 
 			//Export the model into a m file
 			bool save_m_file(string filename);
+			bool Another_HDS_model::save_m_file(string filename, int type);
            
            /**************************************************************************************************************************************/ 
 
@@ -253,8 +257,7 @@ namespace Another
             //0: x-positive, 1:x-negative, 2: y-positivem 3:y-negative, 4:z-positive, 5:z-negative
             int get_root_facet_type();
 
-			int get_vertex_number() { return (int)size_of_vertices(); }
-				bool set_U(double* u, int m, int n);
+			bool set_U(double* u, int m, int n);
 			bool PlanarEmbedding();
 			void caculate_conjuct_facet(Halfedge_handle seed);
 			void BFS_faces(Halfedge_handle root,bool visited);

@@ -41,6 +41,7 @@ namespace Another
 	public:
 		double m_distance;
 		int m_node_index;
+		Point m_laplace_position;
 	
 
 	public:

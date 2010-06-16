@@ -13,6 +13,7 @@
 
 //BOOST
 #include <boost/program_options.hpp>
+#include <boost/lexical_cast.hpp>
 
 //CGAL
 #include <CGAL/Parameterizer_traits_3.h>

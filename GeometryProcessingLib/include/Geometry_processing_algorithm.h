@@ -71,6 +71,12 @@ namespace Another
 
 	typedef std::map<Vertex_handle,double, Vertex_cmp> Vertex2GuassianCurvature_map_type;
 	typedef boost::associative_property_map<Vertex2GuassianCurvature_map_type> Vertex2GuassianCurvature_PM_type;
+
+	enum LapalacianOperatorType
+	{
+		UNIFORM =0,
+		COTANGENT = 1
+	};
 	/************************************************************************/
 	/* \brief Geometry Processing Algorithms for Paint Model                */
 	/************************************************************************/
@@ -91,6 +97,9 @@ namespace Another
 		void LocalMaxandMinGuassian(Another_HDS_model& model, float radius, vector<Vertex_handle>& featurePoints);
 		double* MobiusVoting(Another_HDS_model& source, Another_HDS_model& target);
 		void Embed(Another_HDS_model& source, Another_HDS_model& target);
+
+		//To do, 
+		double* LaplacianMatrix(Another_HDS_model&model, LapalacianOperatorType type);
 	private:
 		void GetMobiusTransformation(vector<complex<double>>& z, vector<complex<double>>& transformation);
 		void ProjectSamples(vector<Vertex_handle>& Points,vector<complex<double>>& MidEdgeSample);
@@ -99,6 +108,9 @@ namespace Another
 		void FindMutualNeightbor(vector<complex<double>>& sourceMidEdgeSample,const vector<complex<double>>& m1, vector<complex<double>>& targetMidEdgeSample, const vector<complex<double>>&m2,vector<pair<int, int>>& pairs);
 		double CalculateDeformationEnergy(vector<complex<double>>&sourceMidEdgeSample,vector<complex<double>>&m1, vector<complex<double>>&targetMidEdgeSample,vector<complex<double>>&m2, vector<pair<int, int>>pairs);
 		bool ClearPropertyMap(Another_HDS_model& model, Vertex_PM_type& vpm, float defaultValue);
+		double computeCot(Another::Point position_v_j, Another::Point position_v_i, Another::Point position_v_k, Another::Point position_v_l );
+		double compute_angle_rad(Another::Point P, Another::Point Q, Another::Point R);
+		double fix_sine(double sine);
 		//HarmonicMap
 	};
 
