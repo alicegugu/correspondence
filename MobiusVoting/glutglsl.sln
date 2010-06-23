@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CommonUtilLib", "..\CommonU
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CWC", "..\cwc\CWC.vcproj", "{B7155C0A-B19C-46DD-8DE7-217F4ABF4CB7}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NumericalLinearAlgebraLib", "..\NumericalLinearAlgebraLib\NumericalLinearAlgebraLib.vcproj", "{93D4B505-1749-4781-A1A5-B2F5ED88D6A5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -52,6 +54,12 @@ Global
 		{B7155C0A-B19C-46DD-8DE7-217F4ABF4CB7}.Release|Win32.ActiveCfg = Release|Win32
 		{B7155C0A-B19C-46DD-8DE7-217F4ABF4CB7}.Release|Win32.Build.0 = Release|Win32
 		{B7155C0A-B19C-46DD-8DE7-217F4ABF4CB7}.Release|x64.ActiveCfg = Release|Win32
+		{93D4B505-1749-4781-A1A5-B2F5ED88D6A5}.Debug|Win32.ActiveCfg = Debug|Win32
+		{93D4B505-1749-4781-A1A5-B2F5ED88D6A5}.Debug|Win32.Build.0 = Debug|Win32
+		{93D4B505-1749-4781-A1A5-B2F5ED88D6A5}.Debug|x64.ActiveCfg = Debug|Win32
+		{93D4B505-1749-4781-A1A5-B2F5ED88D6A5}.Release|Win32.ActiveCfg = Release|Win32
+		{93D4B505-1749-4781-A1A5-B2F5ED88D6A5}.Release|Win32.Build.0 = Release|Win32
+		{93D4B505-1749-4781-A1A5-B2F5ED88D6A5}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

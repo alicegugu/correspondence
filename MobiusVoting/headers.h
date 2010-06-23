@@ -18,6 +18,7 @@
 //CGAL
 #include <CGAL/Parameterizer_traits_3.h>
 #include <CGAL/IO/Polyhedron_iostream_ture.h> // this head file is edited by Gu Huiqin and is not a standard CGAL file
+#include <CGAL/Taucs_solver_traits.h>
 
 //MATLAB
 #include <engine.h>

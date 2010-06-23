@@ -311,6 +311,29 @@ double* DiscreteHarmonicMap(Another::Another_HDS_model* model, int m, int n, int
 
 double* SolveLinearEquation(double* matrixA, double* matrixB, int length)
 {
+
+// 	FILE* afile;	
+// 	afile = fopen("D:\\matrixA.txt","w+");
+// 	for (int i = 0; i<length;i++) 
+// 	{
+// 		for (int j = 0; j<length;++j)
+// 		{
+// 			fprintf(afile,"%f ",matrixA[i*length+j]);
+// 		}
+// 		fprintf(afile,"\n");
+// 	}
+// 	fclose(afile);
+// 
+// 	FILE* bfile;	
+// 	bfile = fopen("D:\\matrixB.txt","w+");
+// 	for (int i = 0; i<length;i++) 
+// 	{
+// 
+// 			fprintf(bfile,"%f ",matrixB[i]);
+// 
+// 	}
+// 	fclose(bfile);
+
 	cout << "calling matlab" << endl;
 	Engine *m_pEngine;
 	m_pEngine = engOpen(NULL);
@@ -322,36 +345,161 @@ double* SolveLinearEquation(double* matrixA, double* matrixB, int length)
 		exit(0);
 	}	
 
-	engSetVisible(m_pEngine, 0);
+	engSetVisible(m_pEngine, 1);
+
+// 	//test
+// 	double testA[4] = { 0.121, 1.898797, 2.79789, 3.89965 };
+// 	double testB[2] = { 4.56464,5.31365846};
+// 
+// 	mxArray *A = NULL;
+// 	mxArray *B = NULL;
+// 
+// 	A = mxCreateDoubleMatrix( 2 , 2 ,mxREAL) ;
+// 	B = mxCreateDoubleMatrix( 2 , 1 , mxREAL) ;
+// 	memcpy((double *) mxGetPr(A),  testA, 2*2*sizeof(double));
+// 	memcpy((double *) mxGetPr(B), testB, 2*sizeof(double));
+// 
+// 	engPutVariable(m_pEngine, "A", A);
+// 	engPutVariable(m_pEngine, "B", B);
+// 
+// 
+// 	mxArray *X = NULL;
+// 	// 	engEvalString(m_pEngine, "A = load('D:\matrixA.txt');"); 
+// 	// 	engEvalString(m_pEngine, "B = load('D:\matrixB.txt');"); 
+// 	engEvalString(m_pEngine, "X = linsolve(A',B);");
+// 
+// 	X = engGetVariable(m_pEngine, "X");
+
 	mxArray *A = NULL;
 	mxArray *B = NULL;
 
-	A = mxCreateNumericMatrix( length -2 , length -2 , mxDOUBLE_CLASS, mxREAL) ;
-	B = mxCreateNumericMatrix( length -2 , 1 , mxDOUBLE_CLASS , mxREAL) ;
+	A = mxCreateDoubleMatrix( length , length ,mxREAL) ;
+	B = mxCreateDoubleMatrix( 1 , length , mxREAL) ;
+// 	mxSetPr (A, matrixA) ;
+// 	mxSetPr (B, matrixB) ;
 
-	mxSetPr (A, matrixA) ;
-	mxSetPr (B, matrixB) ;
+	memcpy((double *) mxGetPr(A),  matrixA, length*length*sizeof(double));
+	memcpy((double *) mxGetPr(B), matrixB, length*sizeof(double));
 
 	engPutVariable(m_pEngine, "A", A);
 	engPutVariable(m_pEngine, "B", B);
 
 
-	engEvalString(m_pEngine, "X = linsolve(A,B)"); 
 	mxArray *X = NULL;
+// 	engEvalString(m_pEngine, "A = load('D:\matrixA.txt');"); 
+// 	engEvalString(m_pEngine, "B = load('D:\matrixB.txt');"); 
+	engEvalString(m_pEngine, "X = linsolve(A',B');");
+
 	X = engGetVariable(m_pEngine, "X");
 
-	double* re = mxGetPr(X);
-
-
-	FILE* refile;	
-	refile = fopen("D:\\matrixX.txt","w+");
-	for (int i = 0; i<length-2;i++)
+	if ( X == NULL) 
 	{
-		fprintf(refile,"%f ",re[i]);
+		cout<<"Get Array Failed"<<endl;
+		return NULL;
 	}
-	fclose(refile);
 
-	return re;
+	double* result = (double*)malloc(sizeof(double)*length);
+	if (result==NULL)
+	{
+		cout<<"Allocate memory for result failed"<<endl;	
+	}
+	memcpy( result,(double *) mxGetPr(X), length*sizeof(double));
+
+
+// 
+// 	FILE* refile;	
+// 	refile = fopen("D:\\matrixX.txt","w+");
+// 	for (int i = 0; i<length;i++)
+// 	{
+// 		fprintf(refile,"%20f ",re[i]);
+// 		if (re[i] == 1.0)
+// 		{
+// 			cout <<"The 1 value is vertex:"<<i<<endl;;
+// 		}
+// 		if (re[i] == -1.0)
+// 		{
+// 			cout<<"The -1 value is vertex:"<<i<<endl;
+// 		}
+// 	}
+// 	fclose(refile);
+
+// 	mxFree(A);
+// 	mxFree(B);
+
+	mxDestroyArray(A);
+	mxDestroyArray(B);
+	mxDestroyArray(X);
+	engClose(m_pEngine);
+
+	return result;
+
+
+
+
+
+
+
+
+
+
+
+// 	typedef CGAL::Taucs_symmetric_solver_traits<double> SparseSolver;
+// 	typedef SparseSolver::Matrix  SparseMatrix;
+// 	typedef SparseSolver::Vector SparseVector;
+// 	typedef SparseSolver::NT SparseNT;
+// 
+// 	// Create two sparse linear systems "A*Xu = Bu" and "A*Xv = Bv" (one line/column per vertex)
+// 	SparseMatrix A(length, length);
+// 	SparseVector Xu(length),  Bu(length);
+// 	SparseNT Du, Dv;
+// 	
+// 
+// 	double avalue;
+// 	for (int i = 0; i< length; ++i)
+// 	{
+// 		for (int j = 0; j< length; ++j)
+// 		{
+// 			avalue = matrixA[i*length+j];
+// 			A.set_coef(i,j,avalue);
+// 		}
+// 	}
+// 
+// 	for (int i = 0; i<length; ++i)
+// 	{
+// 		Bu[i] = matrixB[i];
+// 	}
+// 
+// 	SparseSolver solver;
+// 	// Solve "A*Xu = Bu". On success, solution is (1/Du) * Xu.
+// 	if (!solver.linear_solver(A,Bu,Xu,Du))
+// 	{
+// 		cout<<"Error double* SolveLinearEquation::Cannot solve the matrix"<<endl;
+// 	}
+// 	// WARNING: this package does not support homogeneous coordinates!
+// 	CGAL_surface_mesh_parameterization_assertion(Du == 1.0);
+// 	double* re = (double*)malloc(sizeof(double)*length);
+// 	for (int i =0; i<length; ++i)
+// 	{
+// 		re[i] = Xu[i];
+// 	}
+// 
+// 	FILE* refile;	
+// 	refile = fopen("D:\\matrixX.txt","w+");
+// 	for (int i = 0; i<length;i++) //former is length-2
+// 	{
+// 		fprintf(refile,"%f ",re[i]);
+// 		if (re[i] == 1.0)
+// 		{
+// 			cout <<"The 1 value is vertex:"<<i<<endl;;
+// 		}
+// 		if (re[i] == -1.0)
+// 		{
+// 			cout<<"The -1 value is vertex:"<<i<<endl;
+// 		}
+// 	}
+// 	fclose(refile);
+// 
+// 	return re;
 }
 
 double* GetA(double*matrix, int m, int n, int length )
@@ -489,11 +637,11 @@ public:
 
 #pragma region Embedding
 
-		LoadLaplace(sourceModel);
-		LoadLaplace(targetModel);
-
- 		LaplacianMatrix(sourceModel);
- 		LaplacianMatrix(targetModel);
+// 		LoadLaplace(sourceModel);
+// 		LoadLaplace(targetModel);
+// 
+//  		LaplacianMatrix(sourceModel);
+//  		LaplacianMatrix(targetModel);
 
 #pragma endregion
 
@@ -678,22 +826,39 @@ public:
 			cout<<"cut edge:";
 			cin >> m;
 			cin >> n;
+
 			//Harmonic map
+// 			int length = tmpModel->size_of_vertices();
+// 			double* matrix = DiscreteHarmonicMap(tmpModel, m, n, length);
+// 			double* matrixA = GetA(matrix, m, n , length);
+// 			double* matrixB = GetB(matrix, m , n, length);
+// 			free(matrix);
+// 			matrix = NULL;
+// 			double* result = SolveLinearEquation(matrixA, matrixB,length);
+// 			tmpModel->set_U(result, m,n);
+// 			//free(result);
+// 			result = NULL;
+// 			free(matrixA);
+// 			matrixA = NULL;
+// 			free(matrixB);
+// 			matrixB = NULL;
+// 			free(result);
+
+
+			//New code
+			Another::GeometryProcessingAlgorithm al;
 			int length = tmpModel->size_of_vertices();
-			double* matrix = DiscreteHarmonicMap(tmpModel, m, n, length);
-			double* matrixA = GetA(matrix, m, n , length);
-			double* matrixB = GetB(matrix, m , n, length);
-			free(matrix);
-			matrix = NULL;
-			double* result = SolveLinearEquation(matrixA, matrixB,length);
+			double* A = (double*)malloc(sizeof(double)*length*length);
+			double* B = (double*)malloc(sizeof(double)*length);
+			al.HarmonicMapMatrix(*tmpModel,Another::LapalacianOperatorType::COTANGENT,m,n,A,B);
+			double* result = SolveLinearEquation(A, B,length);
 			tmpModel->set_U(result, m,n);
-			//free(result);
-			result = NULL;
-			free(matrixA);
-			matrixA = NULL;
-			free(matrixB);
-			matrixB = NULL;
+			free(A);
+			A = NULL;
+			free(B);
+			B = NULL;
 			free(result);
+			result = NULL;
 			cout<<"Finish calculating harmonic map"<<endl;
 
 			//Planar embedding
@@ -831,7 +996,7 @@ public:
 		cwc::SmartPtr<cwc::TextureBase> hue_texture = cwc::TextureFactory::CreateTextureFromFile(".\\textures\\hue.png");
 		pair<Another::RenderOption,cwc::SmartPtr<cwc::TextureBase>> curvature_texture(Another::RenderOption::CURVATURE,hue_texture);
 		m_textures.insert(curvature_texture);
-		cwc::SmartPtr<cwc::TextureBase> white_black_check_box = cwc::TextureFactory::CreateCheckBoxTexture(cwc::CheckBoxTextureType::WHITE_BLACK_CHECK_BOX, 64,64);
+		cwc::SmartPtr<cwc::TextureBase> white_black_check_box = cwc::TextureFactory::CreateCheckBoxTexture(cwc::CheckBoxTextureType::WHITE_BLACK_CHECK_BOX, 128,128);
 		pair<Another::RenderOption,cwc::SmartPtr<cwc::TextureBase>> harmonic_texture(Another::RenderOption::DISCRETE_HARMONIC_MAP,white_black_check_box);
 		m_textures.insert(harmonic_texture);
 		if (m_textures.size() ==0)
@@ -1178,6 +1343,10 @@ public:
 
 		case 'd':
 			Delaunay_triangulation( g_model[sourceModel]);
+			break;
+		case 'l':
+			
+			break;
 		default:
 			break;
 		} 

@@ -98,7 +98,13 @@ namespace Another
 		double* MobiusVoting(Another_HDS_model& source, Another_HDS_model& target);
 		void Embed(Another_HDS_model& source, Another_HDS_model& target);
 
-		//To do, 
+		//To do
+		bool HarmonicMapMatrix(Another_HDS_model&model, LapalacianOperatorType type, int k, int l, double* A, double* B);
+		bool HarmonicMap(Another_HDS_model&model, LapalacianOperatorType type, int k,int l, double* C);
+
+		//To amend 
+		//1. double* to matrix class
+		//2. LapalacianOperatorType need to be considered
 		double* LaplacianMatrix(Another_HDS_model&model, LapalacianOperatorType type);
 	private:
 		void GetMobiusTransformation(vector<complex<double>>& z, vector<complex<double>>& transformation);

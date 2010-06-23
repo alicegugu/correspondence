@@ -254,7 +254,6 @@ namespace Another
 		GLfloat vertexArray[3];
 		GLfloat normalArray[3];
 		float tmp_u;
-		float tmp_v;
 		Vertex_handle v;
 		Point p;
 		Normal n;
@@ -283,9 +282,10 @@ namespace Another
 			normalArray[0] = n.x();
 			normalArray[1] = n.y();
 			normalArray[2] = n.z();
-			tmp_v = tmp_u = v->GetU();
+			tmp_u = v->GetU();
+
 			glNormal3fv(normalArray);
-			glTexCoord2f(tmp_u, tmp_v);
+			glTexCoord2f(tmp_u, 0.0);
 			glVertex3fv(vertexArray);
 			//		glVertexAttrib2f(texCoordinates, GLfloat v0, GLfloat v1);
 
@@ -300,9 +300,9 @@ namespace Another
 			normalArray[0] = n.x();
 			normalArray[1] = n.y();
 			normalArray[2] = n.z();
-			tmp_v = tmp_u = v->GetU();
+			tmp_u = v->GetU();
 			glNormal3fv(normalArray);
-			glTexCoord2f(tmp_u, tmp_v);
+			glTexCoord2f(tmp_u, 0.0);
 			glVertex3fv(vertexArray);
 
 			tmpedge=tmpedge->next();
@@ -317,9 +317,9 @@ namespace Another
 			normalArray[0] = n.x();
 			normalArray[1] = n.y();
 			normalArray[2] = n.z();
-			tmp_v = tmp_u = v->GetU();
+			tmp_u = v->GetU();
 			glNormal3fv(normalArray);
-			glTexCoord2f(tmp_u, tmp_v);
+			glTexCoord2f(tmp_u, 0.0);
 			glVertex3fv(vertexArray);
 		}
 #pragma endregion 
@@ -994,23 +994,10 @@ namespace Another
 	//         }
 	bool Another_HDS_model::set_U(double* u, int m, int n)
 	{
-		int i = 0;
 		for( Vertex_iterator v = vertices_begin(); v != vertices_end();++v)
 		{
-			int tmpIndex  = v->GetIndex();
-			if ( tmpIndex != m && tmpIndex!=n )
-			{
-				v->SetU(u[i]);
-				i++;
-			}
-			else if(tmpIndex == m )
-			{
-				v->SetU((double)1.0);
-			}
-			else
-			{
-				v->SetU((double)-1.0);
-			}
+			int tmpIndex  = v->GetIndex()-1;
+			v->SetU(u[tmpIndex]);
 		}
 		return true;
 	}
@@ -1023,6 +1010,7 @@ namespace Another
 		double u1 = root->vertex()->GetU();
 		double u2 = root->opposite()->vertex()->GetU();
 		root->SetU( (u1+u2)/2.0 );
+		
 
 		Init_Faces_Unvisited();
 		BFS_faces(root,true);
@@ -1071,7 +1059,7 @@ namespace Another
 				}
 				else
 				{
-					//caculate chird
+					//calculate child
 					tmp_q.push(tmp_child_Edge);
 					tmp_child_Face->visited = visited;
 

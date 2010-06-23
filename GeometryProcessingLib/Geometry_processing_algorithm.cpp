@@ -110,6 +110,130 @@ namespace Another
 		return weight;
 	}
 
+	/************************************************************************/
+	/* \brief Calculate the matrixes for harmonic map, Which is AU = B		*/
+	/* @param[in] const Another_HDS_model 	the model to be harmonic mapped	*/
+	/* @param[in] const LapalacianOperatorType the laplacian operator type	*/
+	/* @param[in] id of the vertex set with harmonic field value as 1		*/
+	/* @param[in] id of the vertex set with harmonic field value as -1		*/
+	/* @param[out] double* C the harmonic field								*/
+	/************************************************************************/
+	//To be completed
+	bool GeometryProcessingAlgorithm::HarmonicMap(Another_HDS_model&model, LapalacianOperatorType type, int k,int l, double* C)
+	{
+		int n = model.size_of_vertices();
+		double* A = (double*)malloc(sizeof(double)*n*n);
+		double* B = (double*)malloc(sizeof(double)*n);
+		HarmonicMapMatrix(model,type,k,l,A,B);
+		
+		return true;
+	}
+
+	/************************************************************************/
+	/* \brief Calculate the matrices for harmonic map, Which is AU = B		*/
+	/* @param[in] const Another_HDS_model 	the model to be harmonic mapped	*/
+	/* @param[in] const LapalacianOperatorType the Laplacian operator type	*/
+	/* @param[in] id of the vertex set with harmonic field value as 1		*/
+	/* @param[in] id of the vertex set with harmonic field value as -1		*/
+	/* @param[out] double*A the left harmonic matrix					    */
+	/* @param[out] double*B the right side harmonic matrix					*/
+	/************************************************************************/
+	//To amend
+	bool GeometryProcessingAlgorithm::HarmonicMapMatrix(Another_HDS_model&model, LapalacianOperatorType type, int k, int l, double* A, double* B)
+	{
+		if (A == NULL || B == NULL)
+		{
+			cout <<"Error:GeometryProcessingAlgorithm::HarmonicMapMatrix: memory are null for matrix A and B "<<endl;
+			return false;
+		}
+
+		int n = model.size_of_vertices();
+		
+		if (k<1||k>n||l<1||k>n)
+		{
+			cout<<"Error:the vertex of boundary is out of range"<<endl;
+			return false;
+		}
+
+		//Set all the entries of A as 0
+		for (int i=0; i<n; ++i)
+		{
+			for (int j=0; j<n; ++j)
+			{
+				A[i*n+j] =0.0;
+			}
+		}
+
+		//For each vertex
+		Another::Vertex_handle tmpv = model.vertices_begin();
+		for (;tmpv!= model.vertices_end(); ++tmpv)
+		{
+			int tmpIndex = tmpv->GetIndex()-1;
+			
+			//Set the entry as 1 when the vertex is set to 1 or -1
+			if ( tmpIndex == k-1 )
+			{
+				A[tmpIndex*n+tmpIndex] = 1.0;
+				B[tmpIndex] = 1.0;
+				continue;
+			}
+			else if ( tmpIndex == l-1 )
+			{
+				A[tmpIndex*n+tmpIndex] = 1.0;
+				B[tmpIndex] = -1.0;
+				continue;
+			}
+
+			Another::Point  Vi_position = tmpv->point();
+
+			//1-ring neighbor
+			Another::Halfedge_handle tmpEdge;
+			Another::Halfedge_handle firstEdge = tmpv->halfedge();
+			tmpEdge = firstEdge;
+			bool first = true;
+			double sum = 0.0;
+			while(tmpEdge != firstEdge||first) //1-ring neighbor
+			{
+				first = false;
+
+				Another::Vertex_handle vtmpj; //Vertex_handle vtmp;
+
+				Another::Halfedge_handle lastEdge = tmpEdge;
+				Another::Halfedge_handle lastOppositeEdge = tmpEdge->opposite();
+				vtmpj =  lastOppositeEdge->vertex(); //neighbor
+				Another::Point Vj_position = vtmpj->point();
+
+				Another::Halfedge_handle Eik = tmpEdge->next();
+				Another::Vertex_handle Vk = Eik->vertex();
+				Another::Point  Vk_position = Vk->point();
+
+				Another::Halfedge_handle Ejl = lastOppositeEdge->next();
+				Another::Vertex_handle Vl = Ejl->vertex();
+				Another::Point  Vl_position = Vl->point();
+
+				double wij = 0.0;
+				if ( type == Another::LapalacianOperatorType::COTANGENT )
+				{
+					wij = computeCot(Vi_position, Vj_position, Vk_position, Vl_position);
+				}
+				else if ( type ==  Another::LapalacianOperatorType::UNIFORM )
+				{
+					wij = 1.0;
+				}
+				int nIndex = vtmpj->GetIndex()-1;
+				A[tmpIndex*n+nIndex] = -wij;
+				sum = sum + wij;
+				tmpEdge = Ejl->next();
+
+			}
+			A[tmpIndex*n+tmpIndex] = sum;
+			B[tmpIndex] = 0.0;
+		}
+
+	}
+
+
+
 
 
 	/************************************************************************/
@@ -127,7 +251,7 @@ namespace Another
 		{
 			for (int j=0; j<n; ++j)
 			{
-				lpMatrix[i*n+j] =0;
+				lpMatrix[i*n+j] =0.0;
 			}
 		}
 
