@@ -645,19 +645,21 @@ public:
 
 #pragma endregion
 
-#pragma region Harmonic map
+#pragma region Sampling
+
+		GuassianCurvature(sourceModel);
+		GuassianCurvature(targetModel);
+
+#pragma endregion
+
+#pragma region Mid-edge Flattening
 
 		HarmonicMap(sourceModel);
 		HarmonicMap(targetModel);
 
 #pragma endregion
 
-#pragma region Calculate gussain curvature sampling
 
-		GuassianCurvature(sourceModel);
-		GuassianCurvature(targetModel);
-
-#pragma endregion
 
 #pragma region Voting
 
@@ -1106,6 +1108,15 @@ public:
 			glViewport(l_wsW/2, 0, l_wsW/2, l_wsH);
 			g_model[targetModel]->draw(m_renderOption);
 			break;
+		case Another::RenderOption::ALIGNMENT_SELECT:
+			//left view for source
+			glViewport(0, 0, l_wsW/2, l_wsH);
+			g_model[sourceModel]->draw(m_renderOption);
+
+			//right view for target
+			glViewport(l_wsW/2, 0, l_wsW/2, l_wsH);
+			g_model[targetModel]->draw(m_renderOption);
+			break;
 		case Another::RenderOption::DEFAULT:
 			glViewport(0, 0, l_wsW, l_wsH);
 			g_model[sourceModel]->draw(m_renderOption);
@@ -1211,12 +1222,36 @@ public:
 				zprPickFunc(ProcessPickUpTarget);              /* Pick event client callback   */
 			}
 		}
+
+		if (m_renderOption == Another::RenderOption::ALIGNMENT_SELECT)
+		{
+			int l_wsW = GetWidth();
+			int l_wsH = GetHeight();
+			if (m_active_window == DualView::LEFT)
+			{
+				//left view for source
+				glViewport(0, 0, l_wsW/2, l_wsH);
+			//	g_model[sourceModel]->draw(m_renderOption);
+				zprSelectionFunc(SelectThreePointsSource);     /* Selection mode draw function */
+				zprPickFunc(PickThreePointsSource);              /* Pick event client callback   */
+			}
+			else
+			{
+				//right view for target
+				glViewport(l_wsW/2, 0, l_wsW/2, l_wsH);
+			//	g_model[targetModel]->draw(m_renderOption);
+				zprSelectionFunc(SelectThreePointsTarget);     /* Selection mode draw function */
+				zprPickFunc(PickThreePointsTarget);              /* Pick event client callback   */
+			}
+		}
 				
 		zprMouse(button, GLUT_DOWN, x, y);
 
 	}    
 	virtual void OnMouseUp(int button, int x, int y)
 	{
+		zprSelectionFunc(NULL);
+		zprPickFunc(NULL);
 		zprMouse(button, GLUT_UP, x, y);
 	}
 	virtual void OnLeftMouseDrag(int x, int y)
@@ -1240,11 +1275,30 @@ public:
 		case 'a':
 			m_renderOption = Another::RenderOption::LAPLACE;
 			break;
-		case 'm': //show original models todo
-			m_renderOption = Another::RenderOption::MESH;
-			break;
 		case 'c': //show correspondence todo
 			m_renderOption = Another::RenderOption::CURVATURE;
+			break;
+		case 'd':
+			Delaunay_triangulation( g_model[sourceModel]);
+			break;
+		case 'f':
+			m_renderOption = Another::RenderOption::FEATURE_POINT;
+			m_set_correspondence = false;
+			m_dual_window = true;
+			break;
+		case 'h':
+			m_renderOption = Another::RenderOption::DISCRETE_HARMONIC_MAP;
+			m_show_texture = false;
+			m_texture = m_textures[m_renderOption];
+			break;
+		case 'i':
+			
+			break;
+		case 'l':
+
+			break;
+		case 'm': //show original models todo
+			m_renderOption = Another::RenderOption::MESH;
 			break;
 		case 'p'://planar embedding option
 			if (!m_planar)
@@ -1255,44 +1309,17 @@ public:
 			}
 			m_renderOption = Another::RenderOption::PLANAR_EMBEDDING;
 			break;
-		case 'h':
-			m_renderOption = Another::RenderOption::DISCRETE_HARMONIC_MAP;
-			m_show_texture = false;
-			m_texture = m_textures[m_renderOption];
-			break;
-		case 't':
-			m_renderOption = Another::RenderOption::TRIANGULAR;
-			break;
-		case 'f':
-			m_renderOption = Another::RenderOption::FEATURE_POINT;
-			m_set_correspondence = false;
-			m_dual_window = true;
-			break;
-		case 'v':
-			if (!m_correspoendence)
-			{
-				vector<pair<int,int>> pairs;
-				Voting(sourceModel,targetModel,pairs);
-				SetCorrespoendence(sourceModel,targetModel,pairs);
-				Another::Another_HDS_model::init_color_map();
-				m_correspoendence = true;
-				m_renderOption = Another::RenderOption::CORRESPONDENCE;
-			}
-			else
-			{
-				cout<<"Already construct correspondence"<<endl;
-			}
-			break;
 		case 's':
 			{
 				switch(m_renderOption)
 				{
-				//Discrete harmonic map mode, 's' key to toggle 2D texture display
+				
+					//Discrete harmonic map mode, 's' key to toggle 2D texture display
 				case Another::RenderOption::DISCRETE_HARMONIC_MAP:
 					m_show_texture = !m_show_texture;
 					break;
 
-				//Feature point mode, 's' key to toggle correspondence selection
+					//Feature point mode, 's' key to toggle correspondence selection
 				case Another::RenderOption::FEATURE_POINT:
 					m_set_correspondence = !m_set_correspondence;
 					if (m_set_correspondence)
@@ -1339,14 +1366,39 @@ public:
 					break;
 				}
 			}
-		break;
-
-		case 'd':
-			Delaunay_triangulation( g_model[sourceModel]);
 			break;
-		case 'l':
-			
+		case 't':
+			m_renderOption = Another::RenderOption::TRIANGULAR;
 			break;
+	
+		case 'v':
+			if (!m_correspoendence)
+			{
+				vector<pair<int,int>> pairs;
+				Voting(sourceModel,targetModel,pairs);
+				SetCorrespoendence(sourceModel,targetModel,pairs);
+				Another::Another_HDS_model::init_color_map();
+				m_correspoendence = true;
+				m_renderOption = Another::RenderOption::CORRESPONDENCE;
+			}
+			else
+			{
+				cout<<"Already construct correspondence"<<endl;
+			}
+			break;
+		case 'z':
+			if (m_renderOption!=Another::RenderOption::ALIGNMENT_SELECT)
+			{
+				m_dual_window = true;
+				m_renderOption = Another::RenderOption::ALIGNMENT_SELECT;
+			}
+			else
+			{
+				m_dual_window = false;
+				m_renderOption = Another::RenderOption::DEFAULT;
+				zprSelectionFunc(NULL);
+				zprPickFunc(NULL);
+			}
 		default:
 			break;
 		} 
@@ -1514,6 +1566,14 @@ public:
 	}
 
 	/************************************************************************/
+	/* Load models for computing correspondence                             */
+	/************************************************************************/
+// 	void LoadModels()
+// 	{
+// 		ifstream 
+// 	}
+
+	/************************************************************************/
 	/* /brief                                                               */
 	/************************************************************************/
 	void ProcessingMatrix(double* correspoendenceMatrix, vector<pair<int,int>>& pairs)
@@ -1567,6 +1627,51 @@ public:
 		}
 		src->set_correspondence(IndexSrc);
 		targ->set_correspondence(IndexTag);
+	}
+
+	static void SelectThreePointsSource(void)
+	{
+// 		Another::Another_HDS_model* src = g_model[sourceModel];
+// 		Another::Another_HDS_model* targ = g_model[targetModel];
+// 		//left view for source
+// 		glViewport(0, 0, l_wsW/2, l_wsH);
+// 		glPushName(0);
+// 		src->draw_feature_points(GL_SELECT);
+// 		glPopName();
+// 		//right view for target
+// 		glViewport(l_wsW/2, 0, l_wsW/2, l_wsH);
+// 		glPushName(1);
+// 		targ->draw_feature_points(GL_SELECT);
+// 		glPopName();
+
+		Another::Another_HDS_model* src = g_model[sourceModel];
+		src->draw_feature_points(GL_SELECT);
+	}
+
+	static void SelectThreePointsTarget(void)
+	{
+		Another::Another_HDS_model* target = g_model[targetModel];
+		target->draw_feature_points(GL_SELECT);
+	}
+
+	static void PickThreePointsTarget(GLint name)
+	{
+		if (name>-1)
+		{
+			cout<<"Picked up target model's feature point: "<<name<<endl;
+			if(!g_model[targetModel]->add_three_points(name))
+				cout<<"Add three points are error"<<endl;
+		}
+	}
+
+	static void PickThreePointsSource(GLint name)
+	{
+		if (name>-1)
+		{
+			cout<<"Pick up source model's feature point: "<<name<<endl;
+			if(!g_model[sourceModel]->add_three_points(name))
+				cout<<"Add three points are error"<<endl;
+		}
 	}
 };
 

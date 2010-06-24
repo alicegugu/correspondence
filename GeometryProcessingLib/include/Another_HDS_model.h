@@ -30,15 +30,18 @@ namespace Another
 
 	enum RenderOption
 	{
-		DISCRETE_HARMONIC_MAP = 0,
-		PLANAR_EMBEDDING = 1,
+		DISCRETE_HARMONIC_MAP = 0,//show harminic map
+		PLANAR_EMBEDDING = 1, //show embedded
 		MESH = 2,
 		CURVATURE =3,
-		TRIANGULAR = 4,
-		FEATURE_POINT = 5,
+		TRIANGULAR = 4, //show triangular mesh
+		FEATURE_POINT = 5,//select 
 		CORRESPONDENCE = 6,
 		DEFAULT = 7,
-		LAPLACE = 8 
+		LAPLACE = 8,
+		CUTFACESELECTION = 9,
+		ALIGNMENT_SELECT = 10,
+		ALIGNMENT_RESULT = 11
 	};
     //An item wrapper using My_vertex, My_halfedge, My_face
 	struct My_items: public CGAL::Polyhedron_items_3
@@ -160,6 +163,7 @@ namespace Another
 	public:
 			int m_cutface; //Face index of cut face
 
+			vector<int> m_three_points;
 
         public:
         
@@ -289,6 +293,16 @@ namespace Another
 
 			//Get the feature point vertex index by name
 			int get_feature_index(int name);
+
+			bool add_three_points(int featureindex)
+			{
+				m_three_points.push_back(featureindex);
+				if (m_three_points.size()>3)
+				{
+					return false;
+				}
+				return true;
+			}
         };
 
     }
