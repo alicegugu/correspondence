@@ -356,6 +356,10 @@ namespace Another
 		case RenderOption::LAPLACE:
 			draw_laplacian();
 			break;
+		case RenderOption::ALIGNMENT_SELECT:
+			draw(SMOOTH,1,1);
+			draw_feature_points(ALIGNMENT_SELECT);
+			break;
 		case RenderOption::DEFAULT:
 			draw(SMOOTH,1,1);
 		}
@@ -1197,6 +1201,48 @@ namespace Another
 	{
 		switch(mode)
 		{
+		case ALIGNMENT_SELECT:
+			if (m_features.size() == 0)
+			{
+				cout<<"No feature point on mesh"<<endl;
+				break;
+			}
+			for (int i = 0; i<m_features.size(); i++)
+			{
+				glShadeModel(GL_SMOOTH);
+				glPushMatrix();
+				Vertex_handle v = m_features[i];
+				Point_3 v_position = v->point();
+				glTranslatef(v_position.x(),v_position.y(),v_position.z());
+				
+			
+					float color_tmp[3];
+					color_tmp[0] = 0.0;
+					color_tmp[1] = 0.0;
+					color_tmp[2] = 0.0;
+					bool selected= false;
+					assert(m_three_points.size()<4);
+					for(int j =0; j <m_three_points.size(); j++ )
+					{
+						if (i == m_three_points[j])
+						{
+							selected = true;
+							color_tmp[j] = 1.0;
+						}
+					}
+					
+					if (selected ==false)
+					{
+						color_tmp[0] = 1.0;
+						color_tmp[1] = 1.0;
+						color_tmp[2] = 0.0;
+					}
+					glColor3f(color_tmp[0], color_tmp[1], color_tmp[2]);
+				
+				glutSolidSphere(0.5,16,16);
+				glPopMatrix();
+			}
+			break;
 		case GL_SMOOTH:
 			if (m_features.size() == 0)
 			{
