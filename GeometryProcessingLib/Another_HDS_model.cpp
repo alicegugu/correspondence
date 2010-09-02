@@ -17,6 +17,7 @@ namespace Another
 	GLdouble projection[16];
 	GLfloat g_color_map[300][3];
 	const int FEATURE_CORRESPONDENCE = 1;
+	const int CORRESPONDENCE_RESULT = 2;
 
 	//My_One2OneMap<unsigned int,POLYCUBEMODEL_HDS::Vertex_handle,SORT_POLYCUBEMODEL_VERTEX> my_poly_corner_map;
 	//	My_One2OneMap<unsigned int,Another_HDS::Vertex_iterator,SORT_PAINTMODEL_VERTEX> my_corner_map;
@@ -205,7 +206,7 @@ namespace Another
 		for( ; faceIt!= faceEnd; faceIt++ )
 		{
 			//skip the face has been cut
-			if ( faceIt->GetFaceID() == m_cutface )
+			if ( faceIt == m_cutface_handle)
 			{
 				continue;
 			}
@@ -359,6 +360,9 @@ namespace Another
 		case RenderOption::ALIGNMENT_SELECT:
 			draw(SMOOTH,1,1);
 			draw_feature_points(ALIGNMENT_SELECT);
+			break;
+		case RenderOption::ALIGNMENT_RESULT:
+			draw_midedge();
 			break;
 		case RenderOption::DEFAULT:
 			draw(SMOOTH,1,1);
@@ -938,9 +942,24 @@ namespace Another
 		{
 			v->SetIndex(tmp_index);
 			m_vertexMap.InsertvertexHandleO(tmp_index, v);
-			tmp_index ++;
+			tmp_index++;
 		}
 		return true;
+	}
+
+	/************************************************************************/
+	/* /brief set up a one to one map for faces which is used as radom		*/ 
+	/*	access of faces														*/
+	/************************************************************************/
+	void Another_HDS_model::set_up_one_to_one_face_map()
+	{
+		int tmp_index = 0;
+		for( Face_iterator f = facets_begin(); f != facets_end();++f)
+		{
+			f->SetIndex(tmp_index);
+			m_face_map.InsertvertexHandleO(tmp_index, f);
+			tmp_index++;
+		}
 	}
 
 	void Another_HDS_model::set_correspondence(const vector<int>& indexs)
@@ -1006,6 +1025,9 @@ namespace Another
 		return true;
 	}
 
+	/************************************************************************/
+	/* /brief Calculate the conjugate Harmonic map                          */
+	/************************************************************************/
 	bool Another_HDS_model::PlanarEmbedding()
 	{
 		Halfedge_iterator root = edges_begin();
@@ -1013,12 +1035,174 @@ namespace Another
 		root->SetConjU(0.0);
 		double u1 = root->vertex()->GetU();
 		double u2 = root->opposite()->vertex()->GetU();
-		root->SetU( (u1+u2)/2.0 );
+		root->SetU( (u1+u2)*0.5 );
 		
-
 		Init_Faces_Unvisited();
 		BFS_faces(root,true);
 		return true;
+	}
+
+	bool Another_HDS_model::CalculateConjugateHarmonicMap()
+	{
+		//Set arbitrary vertex's conjugate value as 0
+		Vertex_iterator root  = m_cutface_handle->halfedge()->vertex();
+		Halfedge_iterator startEdge = root->halfedge()->opposite();
+		double u1 = startEdge->vertex()->GetU();
+		double u2 = startEdge->opposite()->vertex()->GetU();
+		startEdge->SetConjU(0.0);
+		startEdge->SetU(0.5*(u1+u2));
+		startEdge->opposite()->SetConjU(0.0);
+		startEdge->opposite()->SetU(0.5*(u1+u2));
+
+		//Init each vertex as unvisited
+		Init_Vertices_Unvisited();
+
+		//Breadth first traversal of vertices and calculate the conjugate map of triangles on the 1-ring neighbor path 
+		BFS_Vertices(root,startEdge,true);
+		return true;
+	}
+
+	bool Another_HDS_model::Init_Vertices_Unvisited()
+	{
+		for (Vertex_iterator it =  vertices_begin(); it != vertices_end(); it++ )
+		{
+			it->visited = false;
+		}
+		return true;
+	}
+
+	bool Another_HDS_model::BFS_Vertices(Vertex_iterator root, Halfedge_handle startEdge,bool visited)
+	{
+		queue<Vertex_handle> vertexQ;
+		queue<Halfedge_handle> startEdgeQ;
+		vertexQ.push(root);  //push root
+		startEdgeQ.push(startEdge);
+		root->visited = visited;
+
+
+		//Processing the queue
+		while(vertexQ.size()>0)
+		{
+			//Fetch items from queue
+			Vertex_handle tmpV = (Vertex_handle)vertexQ.front();
+			vertexQ.pop();
+			Halfedge_handle tmpE = (Halfedge_handle)startEdgeQ.front();
+			startEdgeQ.pop();
+
+		//	CalculateConjugateOneRingNeighor(tmpV,tmpE);
+
+			// calculate the conjugate u along the 1-ring neighbor path and push all unvisited the children vertex
+			//1-ring neighbor
+
+			Halfedge_handle firstEdge = tmpE;
+			Halfedge_handle tmpEdge = firstEdge;
+			Vertex_handle V_j = tmpV;
+			Point V_j_position = V_j->point();
+			double U_j = V_j->GetU();
+
+
+			double lastU,tmpU;
+			bool first = true;
+
+			while(tmpEdge != firstEdge||first) //1-ring neighbor
+			{
+				//For start edge, just set last U as its value
+				if (first==true)
+				{
+					tmpU = tmpEdge->GetConjU();
+// 					if ( tmpU < 0.0 )
+// 					{
+// 						cout<<"Error:The conjugate u of start edge of the 1-ring neighor has not been set"<<endl;
+// 						return false;
+// 					}
+				}
+				else
+				{
+					//Get Vi
+					Halfedge_handle E_ki = tmpEdge->opposite()->next()->next();
+					Vertex_handle V_i = E_ki->vertex();
+					Point V_i_position = V_i->point();
+					double U_i = V_i->GetU();
+
+					//Get Vk
+					Halfedge_handle E_jk = tmpEdge->opposite()->next();
+					Vertex_handle V_k = E_jk->vertex();
+					Point V_k_position = V_k->point();
+					double U_k = V_k->GetU();
+
+					//Calculate 
+					double cotjki = std::tan( compute_angle_rad(V_j_position,V_k_position, V_i_position) );
+					double cotuij;
+
+					cotuij	= (U_i- U_j)/cotjki;
+
+// 					if (cotjki == 0.00000000000)
+// 					{
+// 						cout<<"zero"<<endl;
+// 					}
+// 					if (  cotjki > 0.000000000001 || cotjki< -0.000000000001)
+// 					{
+// 						cotuij	= (U_i- U_j)/cotjki;
+// 					}
+// 					else
+// 					{
+// 						cout<<"Very small angle"<<endl;
+// 						cotuij = (U_i- U_j)*100000000000;
+// 						
+// 					}
+
+					double cotkij = std::tan( compute_angle_rad(V_k_position, V_i_position, V_j_position) );
+					double cotukj;
+
+					cotukj = (U_k- U_j)/cotkij;
+
+// 					if (cotkij==0.00000000000000)
+// 					{
+// 						cout<<"zero"<<endl;
+// 					}
+// 					if ( (cotkij> 0.000000000001) ||(cotkij< -0.000000000001))
+// 					{
+// 						cotukj = (U_k- U_j)/cotkij;
+// 					}
+// 					else
+// 					{
+// 						cout<<"Very small angle"<<endl;
+// 						cotukj = (U_k- U_j)*100000000000;
+// 					}
+					tmpU =	lastU + 0.5*(cotuij+cotukj);	
+					
+					//Set the result to HDS
+					tmpEdge->SetU(0.5*(U_i+U_j));
+					tmpEdge->SetConjU(tmpU);
+					tmpEdge->opposite()->SetU(0.5*(U_i+U_j));
+					tmpEdge->opposite()->SetConjU(tmpU);
+
+				}
+
+				//Push the adjacent vertex to the queue if it has not been visited
+				Vertex_handle adjacent_vertex = tmpEdge->vertex();
+				if (adjacent_vertex->visited !=visited)
+				{
+					vertexQ.push(adjacent_vertex);
+					startEdgeQ.push(tmpEdge->opposite());
+					adjacent_vertex->visited = visited;
+				}
+				
+				//Move to the next edge
+				tmpEdge = tmpEdge->next()->next()->opposite(); 
+				lastU = tmpU;
+				first = false;
+			}
+		}
+		return true;
+	}
+
+	/************************************************************************/
+	/* /brief Calculate the conjugate u following 1-ring neighbor path      */
+	/************************************************************************/
+	void Another_HDS_model::CalculateConjugateOneRingNeighor(Vertex_handle tmpV, Halfedge_handle tmpE)
+	{
+		
 	}
 
 	bool Another_HDS_model::Init_Faces_Unvisited()
@@ -1086,7 +1270,7 @@ namespace Another
 		double Uk, Ui, Uj;
 		Face_handle tmp_face = Ejk->face();
 
-		//Caculate the conjuct for this face
+		//Calculate the conjunct for this face
 		Vertex_handle Vk = Ejk->vertex();
 		Uk = Vk->GetU();
 		Point Vk_position;
@@ -1106,19 +1290,19 @@ namespace Another
 
 		double cotuij = (Ui- Uj)/std::tan( compute_angle_rad(Vj_position,Vk_position, Vi_position) );
 		double cotukj = (Uk- Uj)/std::tan( compute_angle_rad(Vj_position, Vi_position, Vk_position) );
-		Ur = Us + ( cotuij + cotukj)/(double)2;
+		Ur = Us + ( cotuij + cotukj)*0.5;
 
-		Ut = Ur + ( (Uk- Ui)/std::tan(compute_angle_rad(Vi_position,Vj_position, Vk_position)) + (Uj-Ui)/std::tan(compute_angle_rad(Vj_position,Vk_position, Vi_position)))/(double)2;
+		Ut = Ur + ( (Uk- Ui)/std::tan(compute_angle_rad(Vi_position,Vj_position, Vk_position)) + (Uj-Ui)/std::tan(compute_angle_rad(Vj_position,Vk_position, Vi_position)))*0.5;
 
-		Eij->SetU((Ui+Uj)/(double)2);
+		Eij->SetU((Ui+Uj)*0.5);
 		Eij->SetConjU(Ur);
 		Eij->opposite()->SetConjU(Ur);
 
-		Eki->SetU((Ui+Uk)/(double)2);
+		Eki->SetU((Ui+Uk)*0.5);
 		Eki->SetConjU(Ut);
 		Eki->opposite()->SetConjU(Ut);
 
-		Ejk->SetU((Uj+Uk)/(double)2);
+		Ejk->SetU((Uj+Uk)*0.5);
 		Ejk->opposite()->SetConjU(Us);
 	}
 
@@ -1296,41 +1480,49 @@ namespace Another
 					Vertex_handle v = m_features[m_index[i]];
 					Point_3 v_position = v->point();
 
-					if (mode == GL_SELECT)
-					{
-						glShadeModel(GL_SELECT);
-					}
-					else
-					{
-						glShadeModel(GL_SMOOTH);
-					}
+					glShadeModel(GL_SMOOTH);
 
 					glPushMatrix();
 					glTranslatef(v_position.x(),v_position.y(),v_position.z());
 
 
-					if (mode == GL_SELECT)
-					{
-						glPushName(i);
-					}
-
-					GLfloat red = get_color_map(i%6,0);  //pt color
-					GLfloat green = get_color_map(i%6,1);  //pt color
-					GLfloat blue = get_color_map(i%6,2);  //pt color
+					GLfloat red = get_color_map(i%50,0);  //pt color
+					GLfloat green = get_color_map(i%50,1);  //pt color
+					GLfloat blue = get_color_map(i%50,2);  //pt color
 					glColor3f(red,green,blue);
 
 					if (m_enlarge[i])
 					{
-						glutSolidSphere(0.8,16,16);
+						glutSolidSphere(2.0,16,16);
 					}
 					else
 					{
-						glutSolidSphere(0.5,16,16);
+						glutSolidSphere(0.6,16,16);
 					}
-					if (mode == GL_SELECT)
-					{
-						glPopName();
-					}
+
+					glPopMatrix();
+				}
+			}
+			break;
+
+		case CORRESPONDENCE_RESULT:
+			if ( m_index.size() ==0 )
+			{
+				cout<<"No matching"<<endl;
+				break;
+			}
+			else
+			{
+				for (int i = 0; i<m_index.size(); i++)
+				{
+					Vertex_handle v = m_features[m_index[i]];
+					Point_3 v_position = v->point();
+					glShadeModel(GL_SELECT);
+					glPushMatrix();
+					glTranslatef(v_position.x(),v_position.y(),v_position.z());
+					glPushName(i);
+					glutSolidSphere(0.5,16,16);
+					glPopName();
 					glPopMatrix();
 				}
 			}

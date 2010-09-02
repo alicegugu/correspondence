@@ -106,6 +106,7 @@ namespace Another
 	typedef Another_HDS::Facet Facet;
 
 	typedef Sort<Another::Vertex_iterator> SORT_PAINTMODEL_VERTEX;
+	typedef Sort<Another::Face_iterator> SORT_FACE;
 
 
 	class Another_HDS_model:public Another_HDS
@@ -138,6 +139,7 @@ namespace Another
             int m_draw_type; 
 			
 			My_One2OneMap<unsigned int,Another::Vertex_iterator,SORT_PAINTMODEL_VERTEX> m_vertexMap;
+			My_One2OneMap<unsigned int, Another::Face_iterator, SORT_FACE> m_face_map;
 
 			//Feature points
 			vector<Vertex_handle> m_features;
@@ -162,6 +164,7 @@ namespace Another
 
 	public:
 			int m_cutface; //Face index of cut face
+			Face_iterator m_cutface_handle;
 
 			vector<int> m_three_points;
 
@@ -229,6 +232,8 @@ namespace Another
 					features.push_back(Vtmp->GetIndex());
 				} 
 			}
+
+			void set_up_one_to_one_face_map();
             
            /****************************************************************************************************************************************/
            
@@ -250,10 +255,11 @@ namespace Another
             bool setup_OneToOneVertexMap();
 
 			bool Init_Faces_Unvisited();
+			bool Init_Vertices_Unvisited();
 
 			//Export the model into a m file
 			bool save_m_file(string filename);
-			bool Another_HDS_model::save_m_file(string filename, int type);
+			bool save_m_file(string filename, int type);
            
            /**************************************************************************************************************************************/ 
 
@@ -265,6 +271,8 @@ namespace Another
 			bool PlanarEmbedding();
 			void caculate_conjuct_facet(Halfedge_handle seed);
 			void BFS_faces(Halfedge_handle root,bool visited);
+			bool BFS_Vertices(Vertex_iterator root, Halfedge_handle startEdge,bool visited);
+			bool CalculateConjugateHarmonicMap();
              
 			/************************************************Geometry Processing*********************************************/
 			void Sampling();
@@ -282,8 +290,21 @@ namespace Another
 			static GLfloat get_color_map(int index, int component);
 			static float random(float min, float max);
 
-			int get_cut_face() { return m_cutface; }
-			void set_cut_face(int face) { m_cutface = face; }
+			Face_iterator get_cut_face() { return m_cutface_handle; }
+			void set_cut_face(int face) 
+			{
+				m_cutface = face;
+				m_cutface_handle = m_face_map.FindVertexhandleO(face);
+			}
+			void get_cut_point_indexes(int& m, int& n)
+			{
+				Halfedge_handle e = m_cutface_handle->halfedge();
+				m = m_cutface_handle->opposite_vertex(e)->GetIndex();
+				e = e->next();
+				n = m_cutface_handle->opposite_vertex(e)->GetIndex();
+				cout <<"The cut points are:"<<m<<" and "<<n<<endl;
+			}
+			
 			void set_mid_edge_features(const std::vector<complex<double>>& features);
 
 			//Feature selections
@@ -303,6 +324,17 @@ namespace Another
 				}
 				return true;
 			}
+			vector<int>& get_three_points()
+			{
+				return m_three_points;
+			}
+
+			void clear_three_points()
+			{
+				m_three_points.clear();
+			}
+
+			void CalculateConjugateOneRingNeighor(Vertex_handle tmpV, Halfedge_handle tmpE);
         };
 
     }

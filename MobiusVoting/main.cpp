@@ -49,16 +49,6 @@ void drawPickTarget(void)
 }
 void ProcessPickUpSource(GLint name)
 {
-// 	if (name >-1)
-// 	{
-// 		g_model[0]->set_enlarge(name);
-// 		g_model[1]->set_enlarge(name);
-// 	}
-// 	else
-// 	{
-// 		g_model[0]->set_enlarge(name);
-// 		g_model[1]->set_enlarge(name);
-// 	}
 	if (name>-1)
 	{
 		int indexTmp = g_model[sourceModel]->get_feature_index(name) ;
@@ -605,33 +595,33 @@ public:
 /* M file load                                                          */
 /************************************************************************/
 	//	string sourceFilename("D:\\Research\\Correspondence\\3D correspondence\\Project\\MobiusVoting\\source_model.m");
-		string sourceFilename("D:\\Models\\polycube data\\cat\\cat0_no_hole.obj2m.m");
-		string targetFilename("D:\\Models\\polycube data\\cat\\cat_polycube_boundary_xyz.pp.m");
-
-		FILE* f1 = fopen(sourceFilename.c_str(),"r");
-		FILE* f2 = fopen(targetFilename.c_str(),"r");
-
-		Another::Another_HDS_model* model1 = new Another::Another_HDS_model();
-		model1->load_m_file(f1);
-		g_model.push_back(model1);
-		sourceModel = g_model.size()-1;
-		fclose(f1);
-
-		Another::Another_HDS_model* model2 = new Another::Another_HDS_model();
-		model2->load_m_file(f2);
-		g_model.push_back(model2);
-		targetModel = g_model.size()-1;
-		fclose(f2);
+// 		string sourceFilename("D:\\Research\\Correspondence\\3D correspondence\\google hosting\\MobiusVoting\\cat0.m");
+// 		string targetFilename("D:\\Research\\Correspondence\\3D correspondence\\google hosting\\MobiusVoting\\cat0.m");
+// 
+// 		FILE* f1 = fopen(sourceFilename.c_str(),"r");
+// 		FILE* f2 = fopen(targetFilename.c_str(),"r");
+// 
+// 		Another::Another_HDS_model* model1 = new Another::Another_HDS_model();
+// 		model1->load_m_file(f1);
+// 		g_model.push_back(model1);
+// 		sourceModel = g_model.size()-1;
+// 		fclose(f1);
+// 
+// 		Another::Another_HDS_model* model2 = new Another::Another_HDS_model();
+// 		model2->load_m_file(f2);
+// 		g_model.push_back(model2);
+// 		targetModel = g_model.size()-1;
+// 		fclose(f2);
 
 
 		/************************************************************************/
 		/* OFF file load                                                        */
 		/************************************************************************/
 
-// 		string sourceFilename("D:\\Models\\OFFfiles\\cat0_no_hole.off");
-// 		string targetFilename("D:\\Models\\OFFfiles\\cat1_no_hole.off");
-//  		sourceModel = ImportModel(sourceFilename);
-//  		targetModel = ImportModel(targetFilename);
+		string sourceFilename("D:\\Models\\OFFfiles\\sphere.off");
+		string targetFilename("D:\\Models\\OFFfiles\\sphere.off");
+ 		sourceModel = ImportModel(sourceFilename);
+ 		targetModel = ImportModel(targetFilename);
 
 #pragma endregion
 
@@ -647,8 +637,8 @@ public:
 
 #pragma region Sampling
 
-		GuassianCurvature(sourceModel);
-		GuassianCurvature(targetModel);
+// 		GuassianCurvature(sourceModel);
+// 		GuassianCurvature(targetModel);
 
 #pragma endregion
 
@@ -753,6 +743,7 @@ public:
 				stream >> *tmpModel;
 				stream.close();
 				tmpModel->setup_OneToOneVertexMap();
+				tmpModel->set_up_one_to_one_face_map();
 				cout<<"Imported model:"<<filename<<endl;
 				InsertModel(tmpModel);
 				return tmpModel;
@@ -792,6 +783,7 @@ public:
 				stream.close();
 				g_model.push_back(tmpModel);
 				tmpModel->setup_OneToOneVertexMap();
+				tmpModel->set_up_one_to_one_face_map();
 				cout<<"Finish importing model"<<endl;
 				return g_model.size()-1;
 			}
@@ -824,30 +816,24 @@ public:
 		if (tmpModel)
 		{
 			//Specify the cut face
-			int m , n;
-			cout<<"cut edge:";
-			cin >> m;
-			cin >> n;
+// 			int m , n;
+// 			cout<<"cut edge:";
+// 			cin >> m;
+// 			cin >> n;
+
+
+			//Specify cut face
+			int cutFaceIndex;
+			cout<<"cut face index:";
+			cin>>cutFaceIndex;
+			tmpModel->set_cut_face(cutFaceIndex);
+			
+			//Set boundary condition
+			int m = 0;
+			int n = 0;
+			tmpModel->get_cut_point_indexes(m,n);
 
 			//Harmonic map
-// 			int length = tmpModel->size_of_vertices();
-// 			double* matrix = DiscreteHarmonicMap(tmpModel, m, n, length);
-// 			double* matrixA = GetA(matrix, m, n , length);
-// 			double* matrixB = GetB(matrix, m , n, length);
-// 			free(matrix);
-// 			matrix = NULL;
-// 			double* result = SolveLinearEquation(matrixA, matrixB,length);
-// 			tmpModel->set_U(result, m,n);
-// 			//free(result);
-// 			result = NULL;
-// 			free(matrixA);
-// 			matrixA = NULL;
-// 			free(matrixB);
-// 			matrixB = NULL;
-// 			free(result);
-
-
-			//New code
 			Another::GeometryProcessingAlgorithm al;
 			int length = tmpModel->size_of_vertices();
 			double* A = (double*)malloc(sizeof(double)*length*length);
@@ -865,7 +851,8 @@ public:
 
 			//Planar embedding
 			cout<<"Start planar embedding"<<endl;
-			tmpModel->PlanarEmbedding();
+		//	tmpModel->PlanarEmbedding();
+			tmpModel->CalculateConjugateHarmonicMap();
 			cout<<"Finish planar embedding"<<endl;
 		}
 		else
@@ -1040,35 +1027,39 @@ public:
 			glViewport(0, 0, l_wsW/2, l_wsH);
 
 			//Preparing shader;
-			if(m_shader) 
-			{
-				glEnable(GL_TEXTURE_2D);
-				m_shader->setUniform1i("EnvMap", 0);
-				m_shader->setUniform3fv("BaseColor", 3, baseColor);
-				m_shader->setUniform3fv("LightPos", 3, lightPos);
+// 			if(m_shader) 
+// 			{
+// 				glEnable(GL_TEXTURE_2D);
+// 				m_shader->setUniform1i("EnvMap", 0);
+// 				m_shader->setUniform3fv("BaseColor", 3, baseColor);
+// 				m_shader->setUniform3fv("LightPos", 3, lightPos);
+// 
+// 				m_shader->begin();
+// 				g_model[0]->draw(SMOOTH,1,1);
+// 				m_shader->end();
+// 				glDisable(GL_TEXTURE_2D);
+// 			}
 
-				m_shader->begin();
-				g_model[0]->draw(SMOOTH,1,1);
-				m_shader->end();
-				glDisable(GL_TEXTURE_2D);
-			}
-			g_model[sourceModel]->draw_feature_points(GL_SMOOTH);
+			g_model[sourceModel]->draw(SMOOTH,1,1);
+			g_model[sourceModel]->draw_feature_points(1);
 			//	set_curvature();
 
 			//Right view for target
 			glViewport(l_wsW/2, 0, l_wsW/2, l_wsH);
-			if (m_shader) 
-			{
-				glEnable(GL_TEXTURE_2D);
-				m_shader->setUniform1i("EnvMap", 0);
-				m_shader->setUniform3fv("BaseColor", 3, baseColor);
-				m_shader->setUniform3fv("LightPos", 3, lightPos);
-				m_shader->begin();
-				g_model[targetModel]->draw(SMOOTH,1,1);
-				m_shader->end();
-				glDisable(GL_TEXTURE_2D);
-			}
-			g_model[targetModel]->draw_feature_points(GL_SMOOTH);
+
+// 			if (m_shader) 
+// 			{
+// 				glEnable(GL_TEXTURE_2D);
+// 				m_shader->setUniform1i("EnvMap", 0);
+// 				m_shader->setUniform3fv("BaseColor", 3, baseColor);
+// 				m_shader->setUniform3fv("LightPos", 3, lightPos);
+// 				m_shader->begin();
+// 				g_model[targetModel]->draw(SMOOTH,1,1);
+// 				m_shader->end();
+// 				glDisable(GL_TEXTURE_2D);
+// 			}
+			g_model[targetModel]->draw(SMOOTH,1,1);
+			g_model[targetModel]->draw_feature_points(1);
 			break;
 
 		case Another::RenderOption::FEATURE_POINT:
@@ -1108,7 +1099,7 @@ public:
 			glViewport(l_wsW/2, 0, l_wsW/2, l_wsH);
 			g_model[targetModel]->draw(m_renderOption);
 			break;
-		case Another::RenderOption::ALIGNMENT_SELECT:
+		case Another::RenderOption::ALIGNMENT_SELECT:case Another::RenderOption::ALIGNMENT_RESULT:
 			//left view for source
 			glViewport(0, 0, l_wsW/2, l_wsH);
 			g_model[sourceModel]->draw(m_renderOption);
@@ -1242,6 +1233,28 @@ public:
 			//	g_model[targetModel]->draw(m_renderOption);
 				zprSelectionFunc(SelectThreePointsTarget);     /* Selection mode draw function */
 				zprPickFunc(PickThreePointsTarget);              /* Pick event client callback   */
+			}
+		}
+
+		if (m_renderOption == Another::RenderOption::CORRESPONDENCE)
+		{
+			int l_wsW = GetWidth();
+			int l_wsH = GetHeight();
+			if (m_active_window == DualView::LEFT)
+			{
+				//left view for source
+				glViewport(0, 0, l_wsW/2, l_wsH);
+				//	g_model[sourceModel]->draw(m_renderOption);
+				zprSelectionFunc(CorrespondenceEnlargeSelectionSource);     /* Selection mode draw function */
+				zprPickFunc(CorrespondenceEnlargePickSource);              /* Pick event client callback   */
+			}
+			else
+			{
+				//right view for target
+				glViewport(l_wsW/2, 0, l_wsW/2, l_wsH);
+				//	g_model[targetModel]->draw(m_renderOption);
+				zprSelectionFunc(CorrespondenceEnlargeSelectionTarget);     /* Selection mode draw function */
+				zprPickFunc(CorrespondenceEnlargePickTarget);              /* Pick event client callback   */
 			}
 		}
 				
@@ -1386,9 +1399,25 @@ public:
 				cout<<"Already construct correspondence"<<endl;
 			}
 			break;
+		case 'y':
+			if (m_renderOption == Another::RenderOption::ALIGNMENT_SELECT)
+			{
+				//quit the selection
+				zprSelectionFunc(NULL);
+				zprPickFunc(NULL);	
+				if (!MobiusTransform())
+				{
+					cout<<"Error in getting mobius transformation between the two model"<<endl;
+					break;
+				}
+				m_renderOption = Another::RenderOption::ALIGNMENT_RESULT;
+				m_dual_window = true;
+			}
+			break;
 		case 'z':
 			if (m_renderOption!=Another::RenderOption::ALIGNMENT_SELECT)
 			{
+				ClearThreePoints();
 				m_dual_window = true;
 				m_renderOption = Another::RenderOption::ALIGNMENT_SELECT;
 			}
@@ -1406,6 +1435,81 @@ public:
 		Repaint();
 	}
 
+	bool MobiusTransform()
+	{
+		//Get models
+		Another::Another_HDS_model* src = g_model[sourceModel];
+		Another::Another_HDS_model* targ = g_model[targetModel];
+
+		//Init the algorithm class
+		Another::GeometryProcessingAlgorithm geoAl;
+
+		//Caculate the edge length to prepare for projecting the vertex points to mid-edge points
+		src->calculate_edge_length();
+		targ->calculate_edge_length();
+
+		//Get vertex features
+		vector<Another::Vertex_handle>& sourcePoints = src->get_samples();
+		vector<Another::Vertex_handle>& targetPoints = targ->get_samples();
+
+		//Get the indexes of selected three points
+		vector<int>& sourceThreePoints = src->get_three_points();
+		vector<int>& targetThreePoints = targ->get_three_points();
+		assert(sourceThreePoints.size()==3);
+		assert(targetThreePoints.size()==3);
+
+		//Get the vertex handles of the selected three points
+		vector<Another::Vertex_handle> sourceTripletHandle;
+		vector<Another::Vertex_handle> targetTripletHandle;
+		sourceTripletHandle.push_back(sourcePoints[sourceThreePoints[0]]);
+		sourceTripletHandle.push_back(sourcePoints[sourceThreePoints[1]]);
+		sourceTripletHandle.push_back(sourcePoints[sourceThreePoints[2]]);
+
+		targetTripletHandle.push_back(targetPoints[targetThreePoints[0]]);
+		targetTripletHandle.push_back(targetPoints[targetThreePoints[1]]);
+		targetTripletHandle.push_back(targetPoints[targetThreePoints[2]]);
+
+
+		//Project teh three vertex handles to nearst mid edge points
+		vector<complex<double>> sourceTripletMidEdge;
+		vector<complex<double>> targetTripletMidEdge;
+		geoAl.ProjectSamples(sourceTripletHandle,sourceTripletMidEdge);
+		geoAl.ProjectSamples(targetTripletHandle,targetTripletMidEdge);
+
+		//Project teh sample vertex handles to nearest mid edge points
+		vector<complex<double>> sourceSampleMidEdge;
+		vector<complex<double>> targetSampleMidEdge;
+		geoAl.ProjectSamples(sourcePoints,sourceSampleMidEdge);
+		geoAl.ProjectSamples(targetPoints,targetSampleMidEdge);
+
+
+
+		//Find the mobius transformation
+		vector<complex<double>> m1, m2;
+		geoAl.GetMobiusTransformation(sourceTripletMidEdge,m1);
+		geoAl.GetMobiusTransformation(targetTripletMidEdge,m2);
+
+		geoAl.MobiusTransform(*src, m1);
+		geoAl.MobiusTransform(*targ, m2);
+
+		vector<pair<int, int>> pairs;
+		pairs.clear();
+
+		geoAl.FindMutualNeightbor(sourceSampleMidEdge,m1, targetSampleMidEdge,m2, pairs);
+		int n = sourceSampleMidEdge.size();
+		if ( pairs.size()>= n/2 )
+		{
+			//To do Measuring deformation error
+			double energy = geoAl.CalculateDeformationEnergy(sourceSampleMidEdge,m1, targetSampleMidEdge,m2, pairs);
+			double vvv = 1.0/(0.00000001+energy/((double)pairs.size()));
+			cout<<"The energy is: "<<energy<<". The entry is: "<<vvv<<"."<<endl;
+		}
+		else
+		{
+			cout<<"Pairs are less than n/2"<<endl;
+		}
+		return true;
+	}
 	virtual void OnKeyUp(int nKey, char cAscii)
 	{
 		if (cAscii == 's')      // s: Shader
@@ -1648,6 +1752,46 @@ public:
 		src->draw_feature_points(GL_SELECT);
 	}
 
+	static void CorrespondenceEnlargeSelectionSource(void)
+	{
+		Another::Another_HDS_model* src = g_model[sourceModel];
+		src->draw_feature_points(2);
+	}
+
+	static void CorrespondenceEnlargeSelectionTarget(void)
+	{
+		Another::Another_HDS_model* target = g_model[targetModel];
+		target->draw_feature_points(2);
+	}
+
+	static void CorrespondenceEnlargePickSource(GLint name)
+	{
+		if (name >-1)
+		{
+			g_model[sourceModel]->set_enlarge(name);
+			g_model[targetModel]->set_enlarge(name);
+		}
+		else
+		{
+			g_model[sourceModel]->set_enlarge(name);
+			g_model[targetModel]->set_enlarge(name);
+		}
+	}
+
+	static void CorrespondenceEnlargePickTarget(GLint name)
+	{
+		if (name >-1)
+		{
+			g_model[sourceModel]->set_enlarge(name);
+			g_model[targetModel]->set_enlarge(name);
+		}
+		else
+		{
+			g_model[sourceModel]->set_enlarge(name);
+			g_model[targetModel]->set_enlarge(name);
+		}
+	}
+
 	static void SelectThreePointsTarget(void)
 	{
 		Another::Another_HDS_model* target = g_model[targetModel];
@@ -1672,6 +1816,11 @@ public:
 			if(!g_model[sourceModel]->add_three_points(name))
 				cout<<"Add three points are error"<<endl;
 		}
+	}
+	void ClearThreePoints()
+	{
+		g_model[sourceModel]->clear_three_points();
+		g_model[targetModel]->clear_three_points();
 	}
 };
 

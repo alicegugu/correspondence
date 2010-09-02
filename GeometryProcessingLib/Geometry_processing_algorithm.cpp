@@ -637,7 +637,8 @@ namespace Another
 
 		int iteration = 0;
 		int samplesize = sourcePoints.size();
-		int interationNum = samplesize*(samplesize-1);
+		//int interationNum = samplesize*(samplesize-1);
+		int interationNum = 1000;
 		double* correspondenceMatrix = (double*)malloc(sizeof(double)*samplesize*samplesize);
 		for (size_t i = 0; i< samplesize*samplesize;i++)
 		{
@@ -902,6 +903,35 @@ namespace Another
 
 		}while(smallest<1000000.0);
 
+	}
+
+	/************************************************************************/
+	/* /brief Transform the mid-edge mesh by the mobius transformation given*/
+	/* /param [in and out]Another_HDS_model& the model to be transformed	*/
+	/* /param [in] vector<complex<double>>& the transfomation matrix		*/
+	/************************************************************************/
+	void GeometryProcessingAlgorithm::MobiusTransform(Another_HDS_model&model, vector<complex<double>>& transformation)
+	{
+		Face_iterator faceIt = model.facets_begin();
+		Face_iterator faceEnd = model.facets_end();
+		for( ; faceIt!= faceEnd; faceIt++ )
+		{
+			Halfedge_handle tmpedge;
+			tmpedge = faceIt->halfedge();
+			for (int i =0; i<3; i++)
+			{
+				double point[2];
+				point[0]= tmpedge->GetU();
+				point[1]= tmpedge->GetConjU();
+				complex<double> midedgePoint(point[0],point[1]);
+				complex<double> transformedMidedgePoint;
+				assert( transformation.size() == 4 );
+				MobiusTransform(midedgePoint,transformation,transformedMidedgePoint);
+				tmpedge->SetU(transformedMidedgePoint.real());
+				tmpedge->SetConjU(transformedMidedgePoint.imag());
+				tmpedge = tmpedge->next();
+			}
+		}
 	}
 
 	/************************************************************************/

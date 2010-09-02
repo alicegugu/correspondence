@@ -106,13 +106,20 @@ namespace Another
 		//1. double* to matrix class
 		//2. LapalacianOperatorType need to be considered
 		double* LaplacianMatrix(Another_HDS_model&model, LapalacianOperatorType type);
-	private:
-		void GetMobiusTransformation(vector<complex<double>>& z, vector<complex<double>>& transformation);
 		void ProjectSamples(vector<Vertex_handle>& Points,vector<complex<double>>& MidEdgeSample);
-		void MobiusTransform(const complex<double>&sample, const vector<complex<double>>&m1, complex<double>& transformedSample);
-		int MatchClosest(vector<complex<double>>& samplelist, complex<double>& sample);
+		void GetMobiusTransformation(vector<complex<double>>& z, vector<complex<double>>& transformation);
+
+		//Transform the mid-edge mesh by the mobius transformation given
+		void MobiusTransform(Another_HDS_model&model, vector<complex<double>>& transformation);
 		void FindMutualNeightbor(vector<complex<double>>& sourceMidEdgeSample,const vector<complex<double>>& m1, vector<complex<double>>& targetMidEdgeSample, const vector<complex<double>>&m2,vector<pair<int, int>>& pairs);
 		double CalculateDeformationEnergy(vector<complex<double>>&sourceMidEdgeSample,vector<complex<double>>&m1, vector<complex<double>>&targetMidEdgeSample,vector<complex<double>>&m2, vector<pair<int, int>>pairs);
+	private:
+		
+		
+		void MobiusTransform(const complex<double>&sample, const vector<complex<double>>&m1, complex<double>& transformedSample);
+		int MatchClosest(vector<complex<double>>& samplelist, complex<double>& sample);
+
+		
 		bool ClearPropertyMap(Another_HDS_model& model, Vertex_PM_type& vpm, float defaultValue);
 		double computeCot(Another::Point position_v_j, Another::Point position_v_i, Another::Point position_v_k, Another::Point position_v_l );
 		double compute_angle_rad(Another::Point P, Another::Point Q, Another::Point R);
